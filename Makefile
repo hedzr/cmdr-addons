@@ -7,13 +7,13 @@ include .env
   # https://www.gnu.org/savannah-checkouts/gnu/make/manual/html_node/Text-Functions.html
   # https://stackoverflow.com/questions/19571391/remove-prefix-with-make
 
-APPNAME=$(shell grep -E "AppName[ \t]+=[ \t]+" doc.go|grep -Eo "\\\".+\\\"")
+APPNAME=$(patsubst "%",%,$(shell grep -E "AppName[ \t]+=[ \t]+" doc.go|grep -Eo "\\\".+\\\""))
 VERSION=$(shell grep -E "Version[ \t]+=[ \t]+" doc.go|grep -Eo "[0-9.]+")
 
 # Go related variables.
 GOBASE = $(shell pwd)
-##GOPATH="$(GOBASE)/vendor:$(GOBASE)"
-##GOPATH=$(GOBASE)/vendor:$(GOBASE):$(shell dirname $(GOBASE))
+#,#GOPATH="$(GOBASE)/vendor:$(GOBASE)"
+#,#GOPATH=$(GOBASE)/vendor:$(GOBASE):$(shell dirname $(GOBASE))
 #GOPATH2= $(shell dirname $(GOBASE))
 #GOPATH1= $(shell dirname $(GOPATH2))
 #GOPATH0= $(shell dirname $(GOPATH1))
@@ -45,6 +45,11 @@ SERVER_START_ARG=server run
 SERVER_STOP_ARG=server stop
 
 
+
+MAIN_APPS = fluent winsvc
+
+
+ 
 goarch=amd64
 W_PKG=github.com/hedzr/cmdr/conf
 TIMESTAMP=$(shell date -u '+%Y-%m-%d_%I:%M:%S%p')
@@ -100,22 +105,50 @@ CN = hedzr/$(N)
 .PHONY: godoc format fmt lint cov gocov coverage codecov cyclo bench
 
 
+# For the full list of GOARCH/GOOS, take a look at:
+#  https://github.com/golang/go/blob/master/src/go/build/syslist.go
+#
+# A snapshot is:
+#  const goosList = "aix android darwin dragonfly freebsd hurd illumos js linux nacl netbsd openbsd plan9 solaris windows zos "
+#  const goarchList = "386 amd64 amd64p32 arm armbe arm64 arm64be ppc64 ppc64le mips mipsle mips64 mips64le mips64p32 mips64p32le ppc riscv riscv64 s390 s390x sparc sparc64 wasm "
+#©
+
+
 ## build: Compile the binary. Synonym of `compile`
 build: compile
+
+
+## build-win: build to windows executable, for LAN deploy manually.
+build-win:
+	@echo "  >  Building linux binary..."
+	@echo "  >  LDFLAGS = $(LDFLAGS)"
+	$(foreach an, $(MAIN_APPS), \
+	  echo "  >  APP NAMEs = appname:$(APPNAME)|projname:$(PROJECTNAME)|an:$(an)"; \
+	  $(foreach os, windows, \
+	    echo "     Building $(GOBIN)/$(an)_$(os)_$(goarch)...$(os)"; \
+	    GOARCH="$(goarch)" GOOS="$(os)" \
+	    GOPATH="$(GOPATH)" GOBIN="$(GOBIN)" GO111MODULE="$(GO111MODULE)" GOPROXY="$(GOPROXY)" \
+	        go build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch).exe $(GOBASE)/examples/$(an); \
+	    chmod +x $(GOBIN)/$(an)_$(os)_$(goarch)*; \
+	    ls -la $(LS_OPT) $(GOBIN)/$(an)_$(os)_$(goarch)*; \
+	  ) \
+	)
+	#@ls -la $(LS_OPT) $(GOBIN)/*linux*
 
 ## build-linux: build to linux executable, for LAN deploy manually.
 build-linux:
 	@echo "  >  Building linux binary..."
 	@echo "  >  LDFLAGS = $(LDFLAGS)"
-	$(foreach an, fluent demo ffdemo short wget-demo, \
-	$(foreach os, linux, \
-	  echo "     Building $(GOBIN)/$(an)_$(os)_$(goarch)...$(os)"; \
+	$(foreach an, $(MAIN_APPS), \
+	  echo "  >  APP NAMEs = appname:$(APPNAME)|projname:$(PROJECTNAME)|an:$(an)"; \
+	  $(foreach os, linux, \
+	    echo "     Building $(GOBIN)/$(an)_$(os)_$(goarch)...$(os)"; \
 	    GOARCH="$(goarch)" GOOS="$(os)" \
 	    GOPATH="$(GOPATH)" GOBIN="$(GOBIN)" GO111MODULE="$(GO111MODULE)" GOPROXY="$(GOPROXY)" \
-	      go build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch) $(GOBASE)/examples/$(an)/main.go; \
-	    chmod +x $(GOBIN)/$(an)_$(os)_$(goarch); \
-	    ls -la $(LS_OPT) $(GOBIN)/$(an)_$(os)_$(goarch); \
-	) \
+	        go build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch) $(GOBASE)/examples/$(an); \
+	    chmod +x $(GOBIN)/$(an)_$(os)_$(goarch)*; \
+	    ls -la $(LS_OPT) $(GOBIN)/$(an)_$(os)_$(goarch)*; \
+	  ) \
 	)
 	#@ls -la $(LS_OPT) $(GOBIN)/*linux*
 
@@ -123,15 +156,17 @@ build-linux:
 build-nacl:
 	@echo "  >  Building linux binary..."
 	@echo "  >  LDFLAGS = $(LDFLAGS)"
-	$(foreach an, short ffdemo, \
-	$(foreach os, nacl, \
-	$(foreach goarch, 386 amd64p32 arm, \
-	  echo "     >> Building $(GOBIN)/$(an)_$(os)_$(goarch)...$(os)"; \
+	# unsupported GOOS/GOARCH pair nacl/386 ??
+	$(foreach an, $(MAIN_APPS), \
+	  echo "  >  APP NAMEs = appname:$(APPNAME)|projname:$(PROJECTNAME)|an:$(an)"; \
+	  $(foreach os, nacl, \
+	  $(foreach goarch, 386 arm amd64p32, \
+	    echo "     >> Building $(GOBIN)/$(an)_$(os)_$(goarch)...$(os)" >/dev/null; \
 	    GOARCH="$(goarch)" GOOS="$(os)" \
 	    GOPATH="$(GOPATH)" GOBIN="$(GOBIN)" GO111MODULE="$(GO111MODULE)" GOPROXY="$(GOPROXY)" \
-	      go build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch) $(GOBASE)/examples/$(an)/main.go; \
-	    chmod +x $(GOBIN)/$(an)_$(os)_$(goarch); \
-	    ls -la $(LS_OPT) $(GOBIN)/$(an)_$(os)_$(goarch); \
+	      go build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch) $(GOBASE)/examples/$(an); \
+	    chmod +x $(GOBIN)/$(an)_$(os)_$(goarch)*; \
+	    ls -la $(LS_OPT) $(GOBIN)/$(an)_$(os)_$(goarch)*; \
 	) \
 	) \
 	)
@@ -141,16 +176,22 @@ build-nacl:
 build-ci:
 	@echo "  >  Building binaries in CI flow..."
 	@echo "  >  LDFLAGS = $(LDFLAGS)"
-	$(foreach an, fluent ffdemo demo short wget-demo, \
-	  echo "  >  APPNAME = $(APPNAME)|$(an)"; \
-	  $(foreach os, darwin linux windows, \
-	    echo "     Building $(GOBIN)/$(an)_$(os)_$(goarch)...$(os)"; \
-	      GOARCH="$(goarch)" GOOS="$(os)" \
-	      GOPATH="$(GOPATH)" GOBIN="$(GOBIN)" GO111MODULE="$(GO111MODULE)" GOPROXY="$(GOPROXY)" \
-	        go build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch) $(GOBASE)/examples/$(an)/main.go; \
-	        gzip -f $(GOBIN)/$(an)_$(os)_$(goarch); \
-	  ) \
+	$(foreach an, $(MAIN_APPS), \
+	  echo "  >  APP NAMEs = appname:$(APPNAME)|projname:$(PROJECTNAME)|an:$(an)"; \
+	  $(foreach os, linux darwin windows, \
+	  $(foreach goarch, 386 amd64, \
+	    echo "     >> Building $(GOBIN)/$(an)_$(os)_$(goarch)...$(os)" >/dev/null; \
+	    GOARCH="$(goarch)" GOOS="$(os)" \
+	    GOPATH="$(GOPATH)" GOBIN="$(GOBIN)" GO111MODULE="$(GO111MODULE)" GOPROXY="$(GOPROXY)" \
+	      go build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch) $(GOBASE)/examples/$(an); \
+	    chmod +x $(GOBIN)/$(an)_$(os)_$(goarch); \
+	    ls -la $(LS_OPT) $(GOBIN)/$(an)_$(os)_$(goarch); \
+	    gzip -f $(GOBIN)/$(an)_$(os)_$(goarch); \
+	    ls -la $(LS_OPT) $(GOBIN)/$(an)_$(os)_$(goarch)*; \
+	) \
+	) \
 	)
+	@echo "  < All Done."
 	@ls -la $(LS_OPT) $(GOBIN)/*
 
 
@@ -181,15 +222,15 @@ clean:
 ## run: go run xxx
 run:
 	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go run -ldflags "$(LDFLAGS)" $(GOBASE)/cli/main.go
+	go run -ldflags "$(LDFLAGS)" $(GOBASE)/cli/main.go 
 
 go-build:
 	@echo "  >  Building binary '$(GOBIN)/$(APPNAME)'..."
 	# demo short wget-demo 
-	$(foreach an, fluent ffdemo demo issue2, \
+	$(foreach an, $(MAIN_APPS), \
 	  echo "  >  +race. APPNAME = $(APPNAME)|$(an), LDFLAGS = $(LDFLAGS)"; \
 	  GOPATH=$(GOPATH) GOBIN=$(GOBIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	    go build -v -race -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an) $(GOBASE)/examples/$(an)/main.go; \
+	    go build -v -race -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an) $(GOBASE)/examples/$(an); \
 	  ls -la $(LS_OPT) $(GOBIN)/$(an); \
 	)
 	ls -la $(LS_OPT) $(GOBIN)/
@@ -197,9 +238,9 @@ go-build:
 	# chmod +x $(GOBIN)/*
 
 go-generate:
-	@echo "  >  Generating dependency files..."
+	@echo "  >  Generating dependency files ($(generate)) ..."
 	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go generate $(generate)
+	go generate $(generate) ./...
 	# @echo "     done"
 
 go-mod-download:
@@ -260,12 +301,20 @@ $(BASE):
 godoc: | $(GOBASE) $(BIN)/godoc
 	@echo "  >  PWD = $(shell pwd)"
 	@echo "  >  started godoc server at :6060: http://localhost:6060/pkg/github.com/hedzr/$(PROJECTNAME1) ..."
-	@echo "  $  GOPATH=$(GOPATH) godoc -http=:6060 -index -notes '(BUG|TODO|DONE|Deprecated)' -play -timestamps"
-	@GOPATH=$(GOPATH) \
-	$(BIN)/godoc -http=:6060 -notes '(BUG|TODO|DONE)' -play -timestamps
-	# -goroot $(GOPATH) -index
+	@echo "  $  cd $(GOPATH_) godoc -http=:6060 -index -notes '(BUG|TODO|DONE|Deprecated)' -play -timestamps"
+	( cd $(GOPATH_) && pwd && godoc -v -index -http=:6060 -notes '(BUG|TODO|DONE|Deprecated)' -play -timestamps -goroot .; )
 	# https://medium.com/@elliotchance/godoc-tips-tricks-cda6571549b
 
+
+## godoc1: run godoc server at "localhost;6060"
+godoc1: # | $(GOBASE) $(BIN)/godoc
+	@echo "  >  PWD = $(shell pwd)"
+	@echo "  >  started godoc server at :6060: http://localhost:6060/pkg/github.com/hedzr/$(PROJECTNAME1) ..."
+	#@echo "  $  GOPATH=$(GOPATH) godoc -http=:6060 -index -notes '(BUG|TODO|DONE|Deprecated)' -play -timestamps"
+	godoc -v -index -http=:6060 -notes '(BUG|TODO|DONE|Deprecated)' -play -timestamps # -goroot $(GOPATH) 
+	# gopkg.in/hedzr/errors.v2.New
+	# -goroot $(GOPATH) -index
+	# https://medium.com/@elliotchance/godoc-tips-tricks-cda6571549b
 
 ## fmt: =`format`, run gofmt tool
 fmt: format
@@ -292,7 +341,7 @@ gocov: coverage
 coverage: | $(GOBASE)
 	@echo "  >  gocov ..."
 	@GOPATH=$(GOPATH) GOBIN=$(BIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go test -v -race -coverprofile=coverage.txt -covermode=atomic
+	go test -v -race -coverprofile=coverage.txt -covermode=atomic|tee coverage.log
 	@GOPATH=$(GOPATH) GOBIN=$(BIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
 	go tool cover -html=coverage.txt -o cover.html
 	@open cover.html
@@ -319,6 +368,11 @@ bench:
 	# todo: go install golang.org/x/perf/cmd/benchstat
 
 
+
+## rshz: rsync to my TP470P
+rshz:
+	@echo "  >  sync to hz-pc ..."
+	rsync -arztopg --delete $(GOBASE) hz-pc:$(HZ_PC_GOBASE)/src/github.com/hedzr/
 
 
 .PHONY: printvars info help all

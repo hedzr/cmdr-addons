@@ -2,11 +2,11 @@
  * Copyright © 2019 Hedzr Yeh.
  */
 
-package cmdr
+package cmdr_addons
 
 const (
 	// AppName const
-	AppName = "cmdr"
+	AppName = "cmdr-addons"
 	// Version const
 	Version = "1.6.7"
 	// VersionInt const
