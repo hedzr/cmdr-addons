@@ -1,5 +1,7 @@
 PROJECTNAME1=$(shell basename "$(PWD)")
 PROJECTNAME=$(PROJECTNAME1:go-%=%)
+APPNAME=$(patsubst "%",%,$(shell grep -E "AppName[ \t]+=[ \t]+" doc.go|grep -Eo "\\\".+\\\""))
+VERSION=$(shell grep -E "Version[ \t]+=[ \t]+" doc.go|grep -Eo "[0-9.]+")
 include .env
 -include .env.local
 # ref: https://kodfabrik.com/journal/a-good-makefile-for-go/
@@ -7,25 +9,33 @@ include .env
   # https://www.gnu.org/savannah-checkouts/gnu/make/manual/html_node/Text-Functions.html
   # https://stackoverflow.com/questions/19571391/remove-prefix-with-make
 
-APPNAME=$(patsubst "%",%,$(shell grep -E "AppName[ \t]+=[ \t]+" doc.go|grep -Eo "\\\".+\\\""))
-VERSION=$(shell grep -E "Version[ \t]+=[ \t]+" doc.go|grep -Eo "[0-9.]+")
 
 # Go related variables.
-GOBASE = $(shell pwd)
+GOBASE       =  $(shell pwd)
 #,#GOPATH="$(GOBASE)/vendor:$(GOBASE)"
 #,#GOPATH=$(GOBASE)/vendor:$(GOBASE):$(shell dirname $(GOBASE))
-#GOPATH2= $(shell dirname $(GOBASE))
-#GOPATH1= $(shell dirname $(GOPATH2))
-#GOPATH0= $(shell dirname $(GOPATH1))
-#GOPATH = $(shell dirname $(GOPATH0))
-GOBIN  = $(GOBASE)/bin
-GOFILES= $(wildcard *.go)
-BIN    = $(GOPATH)/bin
-GOLINT = $(BIN)/golint
-GOCYCLO= $(BIN)/gocyclo
-GOYOLO = $(BIN)/yolo
+#GOPATH2     =  $(shell dirname $(GOBASE))
+#GOPATH1     =  $(shell dirname $(GOPATH2))
+#GOPATH0     =  $(shell dirname $(GOPATH1))
+#GOPATH      =  $(shell dirname $(GOPATH0))
+GOBIN        =  $(GOBASE)/bin
+GOFILES      =  $(wildcard *.go)
+SRCS         =  $(shell git ls-files '*.go')
+PKGS         =  $(shell go list ./...)
+GIT_VERSION  := $(shell git describe --tags --abbrev=0)
+GIT_REVISION := $(shell git rev-parse --short HEAD)
+#GITHASH     =  $(shell git rev-parse HEAD)
+#BUILDTIME   := $(shell date "+%Y%m%d_%H%M%S")
+#BUILDTIME   =  $(shell date -u '+%Y-%m-%d_%I:%M:%S%p')
+BUILDTIME    =  $(shell date -u '+%Y-%m-%d_%H-%M-%S')
+GOVERSION    =  $(shell go version)
+BIN          =  $(GOPATH)/bin
+GOLINT       =  $(BIN)/golint
+GOCYCLO      =  $(BIN)/gocyclo
+GOYOLO       =  $(BIN)/yolo
 
-GO111MODULE = on
+
+# GO111MODULE = on
 GOPROXY     = $(or $(GOPROXY_CUSTOM),https://athens.azurefd.net)
 
 # Redirect error output to a file, so we can show it in development mode.
@@ -36,6 +46,25 @@ PID         = $(or $(PID_CUSTOM),/tmp/.$(PROJECTNAME).pid)
 
 # Make is verbose in Linux. Make it silent.
 MAKEFLAGS += --silent
+
+
+goarch=amd64
+W_PKG=github.com/hedzr/cmdr/conf
+LDFLAGS := -s -w \
+	-X '$(W_PKG).Buildstamp=$(BUILDTIME)' \
+	-X '$(W_PKG).Githash=$(GITREVISION)' \
+	-X '$(W_PKG).GoVersion=$(GOVERSION)' \
+	-X '$(W_PKG).Version=$(VERSION)'
+# -X '$(W_PKG).AppName=$(APPNAME)'
+GO := GOARCH="$(goarch)" GOOS="$(os)" \
+	GOPATH="$(GOPATH)" GOBIN="$(GOBIN)" \
+	GO111MODULE=on GOPROXY=$(GOPROXY) go
+GO_OFF := GOARCH="$(goarch)" GOOS="$(os)" \
+	GOPATH="$(GOPATH)" GOBIN="$(GOBIN)" \
+	GO111MODULE=off go
+
+
+
 
 #
 #LDFLAGS=
@@ -49,14 +78,7 @@ SERVER_STOP_ARG=server stop
 MAIN_APPS = fluent winsvc
 
 
- 
-goarch=amd64
-W_PKG=github.com/hedzr/cmdr/conf
-TIMESTAMP=$(shell date -u '+%Y-%m-%d_%I:%M:%S%p')
-GITHASH=$(shell git rev-parse HEAD)
-GOVERSION=$(shell go version)
-LDFLAGS := -s -w -X '$(W_PKG).Buildstamp=$(TIMESTAMP)' -X '$(W_PKG).Githash=$(GITHASH)' -X '$(W_PKG).GoVersion=$(GOVERSION)' -X '$(W_PKG).Version=$(VERSION)'
- # -X '$(W_PKG).AppName=$(APPNAME)'
+
 
 ifeq ($(OS),Windows_NT)
     LS_OPT=
@@ -126,9 +148,7 @@ build-win:
 	  echo "  >  APP NAMEs = appname:$(APPNAME)|projname:$(PROJECTNAME)|an:$(an)"; \
 	  $(foreach os, windows, \
 	    echo "     Building $(GOBIN)/$(an)_$(os)_$(goarch)...$(os)"; \
-	    GOARCH="$(goarch)" GOOS="$(os)" \
-	    GOPATH="$(GOPATH)" GOBIN="$(GOBIN)" GO111MODULE="$(GO111MODULE)" GOPROXY="$(GOPROXY)" \
-	        go build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch).exe $(GOBASE)/examples/$(an); \
+	    $(GO) build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch).exe $(GOBASE)/examples/$(an); \
 	    chmod +x $(GOBIN)/$(an)_$(os)_$(goarch)*; \
 	    ls -la $(LS_OPT) $(GOBIN)/$(an)_$(os)_$(goarch)*; \
 	  ) \
@@ -143,9 +163,7 @@ build-linux:
 	  echo "  >  APP NAMEs = appname:$(APPNAME)|projname:$(PROJECTNAME)|an:$(an)"; \
 	  $(foreach os, linux, \
 	    echo "     Building $(GOBIN)/$(an)_$(os)_$(goarch)...$(os)"; \
-	    GOARCH="$(goarch)" GOOS="$(os)" \
-	    GOPATH="$(GOPATH)" GOBIN="$(GOBIN)" GO111MODULE="$(GO111MODULE)" GOPROXY="$(GOPROXY)" \
-	        go build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch) $(GOBASE)/examples/$(an); \
+	    $(GO) build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch) $(GOBASE)/examples/$(an); \
 	    chmod +x $(GOBIN)/$(an)_$(os)_$(goarch)*; \
 	    ls -la $(LS_OPT) $(GOBIN)/$(an)_$(os)_$(goarch)*; \
 	  ) \
@@ -162,9 +180,7 @@ build-nacl:
 	  $(foreach os, nacl, \
 	  $(foreach goarch, 386 arm amd64p32, \
 	    echo "     >> Building $(GOBIN)/$(an)_$(os)_$(goarch)...$(os)" >/dev/null; \
-	    GOARCH="$(goarch)" GOOS="$(os)" \
-	    GOPATH="$(GOPATH)" GOBIN="$(GOBIN)" GO111MODULE="$(GO111MODULE)" GOPROXY="$(GOPROXY)" \
-	      go build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch) $(GOBASE)/examples/$(an); \
+	    $(GO) build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch) $(GOBASE)/examples/$(an); \
 	    chmod +x $(GOBIN)/$(an)_$(os)_$(goarch)*; \
 	    ls -la $(LS_OPT) $(GOBIN)/$(an)_$(os)_$(goarch)*; \
 	) \
@@ -180,10 +196,7 @@ build-ci:
 	  echo "  >  APP NAMEs = appname:$(APPNAME)|projname:$(PROJECTNAME)|an:$(an)"; \
 	  $(foreach os, linux darwin windows, \
 	  $(foreach goarch, 386 amd64, \
-	    echo "     >> Building $(GOBIN)/$(an)_$(os)_$(goarch)...$(os)" >/dev/null; \
-	    GOARCH="$(goarch)" GOOS="$(os)" \
-	    GOPATH="$(GOPATH)" GOBIN="$(GOBIN)" GO111MODULE="$(GO111MODULE)" GOPROXY="$(GOPROXY)" \
-	      go build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch) $(GOBASE)/examples/$(an); \
+	    $(GO) build -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an)_$(os)_$(goarch) $(GOBASE)/examples/$(an); \
 	    chmod +x $(GOBIN)/$(an)_$(os)_$(goarch); \
 	    ls -la $(LS_OPT) $(GOBIN)/$(an)_$(os)_$(goarch); \
 	    gzip -f $(GOBIN)/$(an)_$(os)_$(goarch); \
@@ -209,7 +222,7 @@ compile: go-clean go-generate
 
 ## exec: Run given cmd, wrapped with custom GOPATH. eg; make exec run="go test ./..."
 exec:
-	@GOPATH=$(GOPATH) GOBIN=$(BIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
+	# @GOPATH=$(GOPATH) GOBIN=$(BIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
 	$(run)
 
 ## clean: Clean build files. Runs `go clean` internally.
@@ -221,16 +234,14 @@ clean:
 
 ## run: go run xxx
 run:
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go run -ldflags "$(LDFLAGS)" $(GOBASE)/cli/main.go 
+	$(GO) run -ldflags "$(LDFLAGS)" $(GOBASE)/cli/main.go 
 
 go-build:
 	@echo "  >  Building binary '$(GOBIN)/$(APPNAME)'..."
 	# demo short wget-demo 
 	$(foreach an, $(MAIN_APPS), \
 	  echo "  >  +race. APPNAME = $(APPNAME)|$(an), LDFLAGS = $(LDFLAGS)"; \
-	  GOPATH=$(GOPATH) GOBIN=$(GOBIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	    go build -v -race -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an) $(GOBASE)/examples/$(an); \
+	  $(GO) build -v -race -ldflags "$(LDFLAGS) -X '$(W_PKG).AppName=$(an)'" -o $(GOBIN)/$(an) $(GOBASE)/examples/$(an); \
 	  ls -la $(LS_OPT) $(GOBIN)/$(an); \
 	)
 	ls -la $(LS_OPT) $(GOBIN)/
@@ -239,28 +250,23 @@ go-build:
 
 go-generate:
 	@echo "  >  Generating dependency files ($(generate)) ..."
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go generate $(generate) ./...
+	$(GO) generate $(generate) ./...
 	# @echo "     done"
 
 go-mod-download:
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go mod download
+	$(GO) mod download
 
 go-get:
 	# Runs `go get` internally. e.g; make install get=github.com/foo/bar
 	@echo "  >  Checking if there is any missing dependencies...$(get)"
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go get $(get)
+	$(GO) get $(get)
 
 go-install:
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go install $(GOFILES)
+	$(GO) install $(GOFILES)
 
 go-clean:
 	@echo "  >  Cleaning build cache"
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go clean
+	$(GO) clean
 	# @echo "     Clean done"
 
 
@@ -273,24 +279,20 @@ $(BIN)/golint: | $(GOBASE)   # # # ❶
 	#@GOPATH=$(GOPATH) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
 	#go get -v golang.org/x/lint/golint
 	@echo "  >  installing golint ..."
-	@GOPATH=$(GOPATH) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go install golang.org/x/lint/golint
+	$(GO) install golang.org/x/lint/golint
 	@cd $(GOBASE)
 
 $(BIN)/gocyclo: | $(GOBASE)  # # # ❶
 	@echo "  >  installing gocyclo ..."
-	@GOPATH=$(GOPATH) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go install github.com/fzipp/gocyclo
+	$(GO) install github.com/fzipp/gocyclo
 
 $(BIN)/yolo: | $(GOBASE)     # # # ❶
 	@echo "  >  installing yolo ..."
-	@GOPATH=$(GOPATH) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go install github.com/azer/yolo
+	$(GO) install github.com/azer/yolo
 
 $(BIN)/godoc: | $(GOBASE)     # # # ❶
 	@echo "  >  installing godoc ..."
-	@GOPATH=$(GOPATH) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go install golang.org/x/tools/cmd/godoc
+	$(GO) install golang.org/x/tools/cmd/godoc
 
 $(BASE):
 	# @mkdir -p $(dir $@)
@@ -342,15 +344,13 @@ coverage: | $(GOBASE)
 	@echo "  >  gocov ..."
 	@GOPATH=$(GOPATH) GOBIN=$(BIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
 	go test -v -race -coverprofile=coverage.txt -covermode=atomic|tee coverage.log
-	@GOPATH=$(GOPATH) GOBIN=$(BIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go tool cover -html=coverage.txt -o cover.html
+	$(GO) tool cover -html=coverage.txt -o cover.html
 	@open cover.html
 
 ## codecov: run go test for codecov; (codecov.io)
 codecov: | $(GOBASE)
 	@echo "  >  codecov ..."
-	@GOPATH=$(GOPATH) GOBIN=$(BIN) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go test -v -race -coverprofile=coverage.txt -covermode=atomic
+	$(GO) test -v -race -coverprofile=coverage.txt -covermode=atomic
 	@bash <(curl -s https://codecov.io/bash) -t $(CODECOV_TOKEN)
 
 ## cyclo: run gocyclo tool
@@ -362,8 +362,7 @@ cyclo: | $(GOBASE) $(GOCYCLO)
 ## bench: benchmark test
 bench:
 	@echo "  >  benchmark testing ..."
-	@GOPATH=$(GOPATH) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
-	go test -bench="." -run=^$ -benchtime=10s ./...
+	$(GO) test -bench="." -run=^$ -benchtime=10s ./...
 	# go test -bench "." -run=none -test.benchtime 10s
 	# todo: go install golang.org/x/perf/cmd/benchstat
 
@@ -394,6 +393,7 @@ info:
 	@echo "PROJECTNAME: $(PROJECTNAME)"
 	@echo "    APPNAME: $(APPNAME)"
 	@echo "    VERSION: $(VERSION)"
+	@echo "  BUILDTIME: $(BUILDTIME)"
 	@echo
 	@echo "export GO111MODULE=on"
 	@echo "export GOPROXY=$(GOPROXY)"
