@@ -19,19 +19,23 @@ import (
 var pd *Program
 
 type Program struct {
-	daemon          Daemon // the daemon object customized by user
-	Config          *service.Config
-	Service         service.Service
-	Logger          service.Logger
-	Command         *cmdr.Command
-	Args            []string
-	Env             []string
-	InvokedInDaemon bool
-	InvokedDirectly bool
-	pidFile         *pidFileStruct
-	err             error
-	fOut            *os.File
-	fErr            *os.File
+	daemon           Daemon // the daemon object customized by user
+	Config           *service.Config
+	Service          service.Service
+	Logger           service.Logger
+	Command          *cmdr.Command
+	Args             []string
+	Env              []string
+	InvokedInDaemon  bool
+	InvokedDirectly  bool
+	ForwardLogToFile bool
+	modifier         func(daemonServerCommand *cmdr.Command) *cmdr.Command
+	preActions       []func(cmd *cmdr.Command, args []string) (err error)
+	postActions      []func(cmd *cmdr.Command, args []string)
+	pidFile          *pidFileStruct
+	err              error
+	fOut             *os.File
+	fErr             *os.File
 	// exit            chan struct{}
 	// done            chan struct{}
 	// Command     *exec.Cmd
@@ -76,17 +80,21 @@ func (p *Program) PrepareAppDirs() (err error) {
 }
 
 func (p *Program) PrepareLogFiles() (err error) {
-	p.fErr, err = os.OpenFile(p.LogStderrFileName(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
-	if err != nil {
-		p.Logger.Warningf("Failed to open/create std err %q: %v", p.LogStderrFileName(), err)
-		return
+	if p.fErr == nil {
+		p.fErr, err = os.OpenFile(p.LogStderrFileName(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
+		if err != nil {
+			p.Logger.Warningf("Failed to open/create std err %q: %v", p.LogStderrFileName(), err)
+			return
+		}
 	}
 
-	p.fOut, err = os.OpenFile(p.LogStdoutFileName(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
-	if err != nil {
-		// logger.Warningf("Failed to open std out %q: %v", p.Stdout, err)
-		p.Logger.Errorf("Failed to open/create std out %q: %v\n", p.LogStdoutFileName(), err)
-		return
+	if p.fOut == nil {
+		p.fOut, err = os.OpenFile(p.LogStdoutFileName(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
+		if err != nil {
+			// logger.Warningf("Failed to open std out %q: %v", p.Stdout, err)
+			p.Logger.Errorf("Failed to open/create std out %q: %v\n", p.LogStdoutFileName(), err)
+			return
+		}
 	}
 
 	return

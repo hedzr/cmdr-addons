@@ -18,9 +18,7 @@ import (
 // - pidfile
 // -
 func WithDaemon(daemonImplObject Daemon,
-	modifier func(daemonServerCommand *cmdr.Command) *cmdr.Command,
-	preAction func(cmd *cmdr.Command, args []string) (err error),
-	postAction func(cmd *cmdr.Command, args []string),
+// modifier func(daemonServerCommand *cmdr.Command) *cmdr.Command,
 	opts ...Opt,
 ) cmdr.ExecOption {
 
@@ -30,7 +28,7 @@ func WithDaemon(daemonImplObject Daemon,
 			DisplayName: "The Daemon",
 			Description: "The Daemon/Service here",
 		},
-		daemon:  daemonImplObject,
+		daemon: daemonImplObject,
 		// Service: nil,
 		// Logger:  nil,
 		// Command: nil,
@@ -52,7 +50,7 @@ func WithDaemon(daemonImplObject Daemon,
 	if pd.Config.Option == nil {
 		pd.Config.Option = make(service.KeyValue)
 	}
-	
+
 	for _, opt := range opts {
 		opt()
 	}
@@ -60,8 +58,8 @@ func WithDaemon(daemonImplObject Daemon,
 	return func(w *cmdr.ExecWorker) {
 		w.AddOnBeforeXrefBuilding(func(root *cmdr.RootCommand, args []string) {
 
-			if modifier != nil {
-				root.SubCommands = append(root.SubCommands, modifier(DaemonServerCommand))
+			if pd.modifier != nil {
+				root.SubCommands = append(root.SubCommands, pd.modifier(DaemonServerCommand))
 			} else {
 				root.SubCommands = append(root.SubCommands, DaemonServerCommand)
 			}
@@ -69,9 +67,9 @@ func WithDaemon(daemonImplObject Daemon,
 			// prefix = strings.Join(append(cmdr.RxxtPrefix, "server"), ".")
 			// prefix = "server"
 
-			attachPreAction(root, preAction)
-			attachPostAction(root, postAction)
-			
+			attachPreAction(root, pd.preActions...)
+			attachPostAction(root, pd.postActions...)
+
 			if err := cmdrPrepare(pd.daemon, root); err != nil {
 				logrus.Fatal(err)
 			}
@@ -89,6 +87,32 @@ func WithServiceConfig(config *service.Config) Opt {
 	}
 }
 
+// WithLoggerForward forwards all log to the out and err files.
+// Typically the files could be found at `/var/log/<appname>/`.
+func WithLoggerForward(force bool) Opt {
+	return func() {
+		pd.ForwardLogToFile = force
+	}
+}
+
+func WithCommandsModifier(modifier func(daemonServerCommand *cmdr.Command) *cmdr.Command) Opt {
+	return func() {
+		pd.modifier = modifier
+	}
+}
+
+func WithPreAction(action func(cmd *cmdr.Command, args []string) (err error)) Opt {
+	return func() {
+		pd.preActions = append(pd.preActions, action)
+	}
+}
+
+func WithPostAction(action func(cmd *cmdr.Command, args []string)) Opt {
+	return func() {
+		pd.postActions = append(pd.postActions, action)
+	}
+}
+
 // // WithOnGetListener returns tcp/http listener for daemon hot-restarting
 // func WithOnGetListener(fn func() net.Listener) Opt {
 // 	return func() {
@@ -96,12 +120,14 @@ func WithServiceConfig(config *service.Config) Opt {
 // 	}
 // }
 
-func attachPostAction(root *cmdr.RootCommand, postAction func(cmd *cmdr.Command, args []string)) {
+func attachPostAction(root *cmdr.RootCommand, postActions ...func(cmd *cmdr.Command, args []string)) {
 	if root.PostAction != nil {
 		savedPostAction := root.PostAction
 		root.PostAction = func(cmd *cmdr.Command, args []string) {
-			if postAction != nil {
-				postAction(cmd, args)
+			for _, postAction := range postActions {
+				if postAction != nil {
+					postAction(cmd, args)
+				}
 			}
 			// pidfile.Destroy()
 			savedPostAction(cmd, args)
@@ -109,8 +135,10 @@ func attachPostAction(root *cmdr.RootCommand, postAction func(cmd *cmdr.Command,
 		}
 	} else {
 		root.PostAction = func(cmd *cmdr.Command, args []string) {
-			if postAction != nil {
-				postAction(cmd, args)
+			for _, postAction := range postActions {
+				if postAction != nil {
+					postAction(cmd, args)
+				}
 			}
 			// pidfile.Destroy()
 			return
@@ -118,7 +146,7 @@ func attachPostAction(root *cmdr.RootCommand, postAction func(cmd *cmdr.Command,
 	}
 }
 
-func attachPreAction(root *cmdr.RootCommand, preAction func(cmd *cmdr.Command, args []string) (err error)) {
+func attachPreAction(root *cmdr.RootCommand, preActions ...func(cmd *cmdr.Command, args []string) (err error)) {
 	if root.PreAction != nil {
 		savedPreAction := root.PreAction
 		root.PreAction = func(cmd *cmdr.Command, args []string) (err error) {
@@ -132,8 +160,10 @@ func attachPreAction(root *cmdr.RootCommand, preAction func(cmd *cmdr.Command, a
 			if err = savedPreAction(cmd, args); err != nil {
 				return
 			}
-			if preAction != nil {
-				err = preAction(cmd, args)
+			for _, preAction := range preActions {
+				if preAction != nil {
+					err = preAction(cmd, args)
+				}
 			}
 			return
 		}
@@ -146,8 +176,10 @@ func attachPreAction(root *cmdr.RootCommand, preAction func(cmd *cmdr.Command, a
 				logrus.Fatal(err)
 			}
 
-			if preAction != nil {
-				err = preAction(cmd, args)
+			for _, preAction := range preActions {
+				if preAction != nil {
+					err = preAction(cmd, args)
+				}
 			}
 			return
 		}
@@ -194,7 +226,11 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 	logrus.Printf("set appname with daemon name: %q", pd.Config.Name)
 
 	err = pd.PrepareAppDirs()
-	
+	if err != nil {
+		logrus.Fatalf("Cannot prepare the app directories: %+v", err)
+		return
+	}
+
 	if len(pd.Config.WorkingDirectory) == 0 {
 		workDir := path.Join("/var/lib", pd.Config.Name)
 		if cmdr.FileExists(workDir) {
@@ -212,6 +248,17 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 			// logFile := path.Join(logDir, conf.AppName, ".out")
 			// errFile := path.Join(logDir, conf.AppName, ".err")
 			pd.Config.Option["LogOutput"] = true
+
+			err = pd.PrepareLogFiles()
+			if err != nil {
+				logrus.Fatalf("Cannot prepare the logging files: %+v", err)
+				return
+			}
+
+			if pd.ForwardLogToFile {
+				logrus.SetOutput(pd.fOut)
+				logrus.Debugf("All logrus logging output will be forwarded to this file.")
+			}
 		}
 
 		pd.Config.Option["envFilename"] = pd.EnvFileName()
