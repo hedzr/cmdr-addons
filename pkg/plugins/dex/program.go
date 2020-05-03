@@ -19,33 +19,42 @@ import (
 var pd *Program
 
 type Program struct {
-	daemon           Daemon // the daemon object customized by user
-	Config           *service.Config
-	Service          service.Service
-	Logger           service.Logger
-	Command          *cmdr.Command
-	Args             []string
-	Env              []string
-	InvokedInDaemon  bool
-	InvokedDirectly  bool
+	daemon  Daemon // the daemon object customized by user
+	Config  *service.Config
+	Service service.Service
+	Logger  service.Logger
+
+	// the arguments of cmdr entry.
+	Command *cmdr.Command
+	Args    []string
+	Env     []string
+
+	// InvokedInDaemon will be set to true if this daemon service is running under service/daemon manager.
+	// For Windows, it's available if the service app has been starting from serivces.msc or by system automatically.
+	// For macOS, the Launchctl starts it.
+	// For Linux, systemd/upstart/sysv does it.
+	//
+	// The underlying detector 
+	InvokedInDaemon bool
+	// InvokedDirectly means that administrator is running it from a tty/console/terminal.
+	InvokedDirectly bool
+	// ForwardLogToFile enables logging forward to /var/log if systemd mode enabled.  
 	ForwardLogToFile bool
-	modifier         func(daemonServerCommand *cmdr.Command) *cmdr.Command
-	preActions       []func(cmd *cmdr.Command, args []string) (err error)
-	postActions      []func(cmd *cmdr.Command, args []string)
-	pidFile          *pidFileStruct
-	err              error
-	fOut             *os.File
-	fErr             *os.File
+
+	modifier    func(daemonServerCommand *cmdr.Command) *cmdr.Command
+	preActions  []func(cmd *cmdr.Command, args []string) (err error)
+	postActions []func(cmd *cmdr.Command, args []string)
+
+	err     error
+	pidFile *pidFileStruct
+	fOut    *os.File
+	fErr    *os.File
 	// exit            chan struct{}
 	// done            chan struct{}
 	// Command     *exec.Cmd
 }
 
-func (p *Program) GetLogFileHandlers() (fOut, fErr *os.File) {
-	return p.fOut, p.fErr
-}
-
-func (p *Program) PrepareAppDirs() (err error) {
+func (p *Program) prepareAppDirs() (err error) {
 
 	if runtime.GOOS == "windows" {
 		return
@@ -79,7 +88,7 @@ func (p *Program) PrepareAppDirs() (err error) {
 	return
 }
 
-func (p *Program) PrepareLogFiles() (err error) {
+func (p *Program) prepareLogFiles() (err error) {
 	if p.fErr == nil {
 		p.fErr, err = os.OpenFile(p.LogStderrFileName(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
 		if err != nil {
@@ -98,6 +107,10 @@ func (p *Program) PrepareLogFiles() (err error) {
 	}
 
 	return
+}
+
+func (p *Program) GetLogFileHandlers() (fOut, fErr *os.File) {
+	return p.fOut, p.fErr
 }
 
 func (p *Program) PidFileName() string {
@@ -194,7 +207,7 @@ func (p *Program) runIt(cmd *cmdr.Command, args []string) {
 	//	}()
 	// }
 
-	p.err = p.PrepareLogFiles()
+	p.err = p.prepareLogFiles()
 	if p.err != nil {
 		panic(p.err)
 	}

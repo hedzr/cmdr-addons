@@ -225,7 +225,7 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 	os.Setenv("APPNAME", pd.Config.Name)
 	logrus.Printf("set appname with daemon name: %q", pd.Config.Name)
 
-	err = pd.PrepareAppDirs()
+	err = pd.prepareAppDirs()
 	if err != nil {
 		logrus.Fatalf("Cannot prepare the app directories: %+v", err)
 		return
@@ -249,7 +249,7 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 			// errFile := path.Join(logDir, conf.AppName, ".err")
 			pd.Config.Option["LogOutput"] = true
 
-			err = pd.PrepareLogFiles()
+			err = pd.prepareLogFiles()
 			if err != nil {
 				logrus.Fatalf("Cannot prepare the logging files: %+v", err)
 				return
