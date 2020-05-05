@@ -256,8 +256,8 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 			}
 
 			if pd.ForwardLogToFile {
+				logrus.Debugf("All logrus logging output will be forwarded to this file: %q.", pd.LogStdoutFileName())
 				logrus.SetOutput(pd.fOut)
-				logrus.Debugf("All logrus logging output will be forwarded to this file.")
 			}
 		}
 
@@ -392,6 +392,9 @@ func daemonHotReload(cmd *cmdr.Command, args []string) (err error) {
 	// ctx := impl.GetContext(Command, Args, daemonImpl, onHotReloading)
 	// impl.HotReload(Command.GetRoot().AppName, ctx)
 
+	if runtime.GOOS == "linux" {
+		// TODO impl hot reloading for linux
+	}
 	return
 }
 

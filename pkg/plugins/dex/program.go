@@ -113,6 +113,18 @@ func (p *Program) GetLogFileHandlers() (fOut, fErr *os.File) {
 	return p.fOut, p.fErr
 }
 
+func (p *Program) SocketFileName() string {
+	if runtime.GOOS == "windows" {
+		return ""
+	}
+	// if runtime.GOOS == "darwin" {
+	// 	return ""
+	// }
+	// logrus.Infof("env.APPNAME = %v, conf.AppName = %v", os.Getenv("APPNAME"), conf.AppName)
+	return cmdr.GetStringR("server.start.socket-file", 
+		os.ExpandEnv("/var/run/$APPNAME/$APPNAME.sock"))
+}
+
 func (p *Program) PidFileName() string {
 	if runtime.GOOS == "windows" {
 		return ""

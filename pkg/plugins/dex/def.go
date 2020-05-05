@@ -14,7 +14,8 @@ import (
 type Daemon interface {
 	// Config() (config *service.Config)
 	
-	OnRun(prog *Program, stopCh, doneCh chan struct{}, listener net.Listener) (err error)
+	// OnRun will be invoked when daemon being started, run/fork at foreground, hot reload ...
+	OnRun(prog *Program, stopCh, doneCh chan struct{}, hotReloadListener net.Listener) (err error)
 	OnStop(prog *Program) (err error)
 	OnReload(prog *Program)
 	OnStatus(prog *Program, p *os.Process) (err error)
