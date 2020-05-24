@@ -16,6 +16,10 @@ func shell(command string, arguments ...string) error {
 	return err
 }
 
+func shellWithOutput(command string, arguments ...string) (int, string, error) {
+	return runCommand(command, true, arguments...)
+}
+
 func sudo(command string, arguments ...string) (int, string, error) {
 	sudocmd, err := exec.LookPath("sudo")
 	if err != nil {
@@ -24,10 +28,6 @@ func sudo(command string, arguments ...string) (int, string, error) {
 
 	rc, output, err1 := runCommand(sudocmd, true, append([]string{command}, arguments...)...)
 	return rc, output, err1
-}
-
-func shellWithOutput(command string, arguments ...string) (int, string, error) {
-	return runCommand(command, true, arguments...)
 }
 
 func runCommand(command string, readStdout bool, arguments ...string) (int, string, error) {

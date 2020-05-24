@@ -4,9 +4,9 @@ go 1.14
 
 // replace github.com/hedzr/logex => ../logex
 
-replace github.com/hedzr/cmdr => ../cmdr
+// replace github.com/hedzr/cmdr => ../cmdr
 
-replace github.com/kardianos/service => ../../kardianos/service
+// replace github.com/kardianos/service => ../../kardianos/service
 
 require (
 	github.com/hedzr/cmdr v1.6.39

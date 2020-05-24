@@ -49,7 +49,7 @@ $ {{.AppName}} stop
 					stop daemonized Program.
 $ {{.AppName}} reload
 					send signal to trigger Program reload its configurations.
-$ {{.AppName}} hot-reload
+$ {{.AppName}} hot-reload [TODO]
 					send signal to make Program restart itself without broken any connections.
 $ {{.AppName}} status
 					display the demonized Program running status.
@@ -94,7 +94,7 @@ $ {{.AppName}} uninstall
 				BaseOpt: cmdr.BaseOpt{
 					Short:       "t",
 					Full:        "stop",
-					Aliases:     []string{"stp", "halt", "pause"},
+					Aliases:     []string{"halt", "pause"},
 					Description: "stop this system service/daemon.",
 					Action:      daemonStop,
 				},
