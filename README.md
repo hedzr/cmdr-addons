@@ -1,5 +1,8 @@
 # Addons for `cmdr`
 
+![Go](https://github.com/hedzr/cmdr-addons/workflows/Go/badge.svg)
+
+
 see also [`cmdr`](https://github.com/hedzr/cmdr).
 
 
