@@ -35,11 +35,11 @@ jobs:
       - name: Test
         run: go test -v -coverprofile=profile.cov ./...
 
-#      - name: Send coverage
-#        uses: shogo82148/actions-goveralls@v1
-#        with:
-#          path-to-profile: profile.cov
-#          parallel: true
+      - name: Send coverage
+        uses: shogo82148/actions-goveralls@v1
+        with:
+          path-to-profile: profile.cov
+          parallel: true
 
   # notifies coveralls that all test jobs are finished
   finish:
