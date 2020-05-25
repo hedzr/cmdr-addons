@@ -31,8 +31,8 @@ docs/
 coverage.txt
 cover.out
 cover.html
+profile.cov
 .tmp.*
-conf.d/
 *.local
 
 ### two executable files
