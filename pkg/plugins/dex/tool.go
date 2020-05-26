@@ -28,7 +28,7 @@ func tplApply(tmpl string, data interface{}) string {
 // IsErrorAddressAlreadyInUse tests if "bind: address already in use" found
 func IsErrorAddressAlreadyInUse(err error) bool {
 	if e, ok := errors.Unwrap(err).(*os.SyscallError); ok {
-		if errno, ok:= e.Err.(syscall.Errno); ok {
+		if errno, ok := e.Err.(syscall.Errno); ok {
 			return errno == syscall.EADDRINUSE
 		}
 	}
@@ -94,49 +94,49 @@ func SetOnGetListener(fn func() net.Listener) {
 // func QuitSignal() chan os.Signal {
 // 	return sig.QuitSignal()
 // }
-// 
+//
 // // SendNilSig sends the POSIX NUL signal
 // func SendNilSig(process *os.Process) error {
 // 	return sig.SendNilSig(process)
 // }
-// 
+//
 // // SendHUP sends the POSIX HUP signal
 // func SendHUP(process *os.Process) error {
 // 	return sig.SendHUP(process)
 // }
-// 
+//
 // // SendUSR1 sends the POSIX USR1 signal
 // func SendUSR1(process *os.Process) error {
 // 	return sig.SendUSR1(process)
 // }
-// 
+//
 // // SendUSR2 sends the POSIX USR2 signal
 // func SendUSR2(process *os.Process) error {
 // 	return sig.SendUSR2(process)
 // }
-// 
+//
 // // SendTERM sends the POSIX TERM signal
 // func SendTERM(process *os.Process) error {
 // 	return sig.SendTERM(process)
 // }
-// 
+//
 // // SendQUIT sends the POSIX QUIT signal
 // func SendQUIT(process *os.Process) error {
 // 	return sig.SendQUIT(process)
 // }
-// 
+//
 // // SendKILL sends the POSIX KILL signal
 // func SendKILL(process *os.Process) error {
 // 	return sig.SendKILL(process)
 // }
-// 
-// 
+//
+//
 // // ServeSignals calls handlers for system signals.
 // // before invoking ServeSignals(), you should run SetupSignals() at first.
 // func ServeSignals() (err error) {
 // 	return sig.ServeSignals()
 // }
-// 
+//
 // // HandleSignalCaughtEvent is a shortcut to block the main business logic loop but break it if os signals caught.
 // // `stop` channel will be trigger if any hooked os signal caught, such as os.Interrupt;
 // // the main business logic loop should trigger `done` once `stop` holds.

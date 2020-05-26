@@ -34,11 +34,11 @@ type Program struct {
 	// For macOS, the Launchctl starts it.
 	// For Linux, systemd/upstart/sysv does it.
 	//
-	// The underlying detector 
+	// The underlying detector
 	InvokedInDaemon bool
 	// InvokedDirectly means that administrator is running it from a tty/console/terminal.
 	InvokedDirectly bool
-	// ForwardLogToFile enables logging forward to /var/log if systemd mode enabled.  
+	// ForwardLogToFile enables logging forward to /var/log if systemd mode enabled.
 	ForwardLogToFile bool
 
 	modifier    func(daemonServerCommand *cmdr.Command) *cmdr.Command
@@ -121,7 +121,7 @@ func (p *Program) SocketFileName() string {
 	// 	return ""
 	// }
 	// logrus.Infof("env.APPNAME = %v, conf.AppName = %v", os.Getenv("APPNAME"), conf.AppName)
-	return cmdr.GetStringR("server.start.socket-file", 
+	return cmdr.GetStringR("server.start.socket-file",
 		os.ExpandEnv("/var/run/$APPNAME/$APPNAME.sock"))
 }
 

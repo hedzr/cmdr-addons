@@ -28,9 +28,9 @@ func ServeSignals() (err error) {
 	// defer func() {
 	// 	removePID(ctx)
 	// }()
-	// 
+	//
 	// log.Printf("serve signals ... pid: %v in %v", os.Getpid(), ctx.PidFileName)
-	
+
 	ch := make(chan os.Signal, 8)
 	signal.Notify(ch, signals...)
 

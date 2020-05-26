@@ -107,4 +107,3 @@ func isExitError(err error) (int, bool) {
 
 	return 0, false
 }
-

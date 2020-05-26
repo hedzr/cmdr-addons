@@ -29,7 +29,7 @@ func newPidFile(filename string) *pidFileStruct {
 
 func (pf *pidFileStruct) Create(cmd *cmdr.Command) {
 	// if cmdr.GetBoolR("server.start.in-daemon") {
-	// 	
+	//
 	// }
 	f, err := os.OpenFile(pf.Path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0770)
 	if err != nil {
@@ -105,6 +105,5 @@ func FindDaemonProcess() (present bool, process *os.Process) {
 	}
 	return
 }
-
 
 const nullDev = "/dev/null"

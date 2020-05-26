@@ -18,7 +18,7 @@ import (
 // - pidfile
 // -
 func WithDaemon(daemonImplObject Daemon,
-// modifier func(daemonServerCommand *cmdr.Command) *cmdr.Command,
+	// modifier func(daemonServerCommand *cmdr.Command) *cmdr.Command,
 	opts ...Opt,
 ) cmdr.ExecOption {
 
@@ -463,7 +463,7 @@ func daemonInstall(cmd *cmdr.Command, args []string) (err error) {
 	}
 
 	// ctx := impl.GetContext(Command, Args, daemonImpl, onHotReloading)
-	// 
+	//
 	// err = runInstaller(Command, Args)
 	// if err != nil {
 	// 	return
@@ -483,7 +483,7 @@ func daemonUninstall(cmd *cmdr.Command, args []string) (err error) {
 	}
 
 	// ctx := impl.GetContext(Command, Args, daemonImpl, onHotReloading)
-	// 
+	//
 	// err = runUninstaller(Command, Args)
 	// if err != nil {
 	// 	return

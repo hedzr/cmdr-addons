@@ -85,4 +85,3 @@ func SendQUIT(process *os.Process) error {
 func SendKILL(process *os.Process) error {
 	return sigSendKILL(process)
 }
-
