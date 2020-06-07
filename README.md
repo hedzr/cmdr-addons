@@ -8,9 +8,28 @@ see also [`cmdr`](https://github.com/hedzr/cmdr).
 
 ## Includes:
 
+### Plugins
+
+#### `dex`
+
 - new version of `daemon` plugin: `dex`
+
+- sample app:
   For examples, see also: [the example app: service](https://github.com/hedzr/cmdr-examples/tree/master/examples/service)
+
+
+#### `trace`
+- `trace`: adds `--trace` to your root command
+
+```go
+TODO
+```
+
+
+### Others
+
 - `svr`: template codes for http/2 server (mux)
+- `vxconf`: helpers
 
 
 
