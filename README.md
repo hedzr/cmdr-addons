@@ -1,9 +1,20 @@
 # Addons for `cmdr`
 
 ![Go](https://github.com/hedzr/cmdr-addons/workflows/Go/badge.svg)
-
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/hedzr/cmdr-addons.svg?label=release)](https://github.com/hedzr/cmdr-addons/releases)
 
 see also [`cmdr`](https://github.com/hedzr/cmdr).
+
+## Prerequisites
+
+golang 1.13+ ONLY!
+
+> **Causes**:  
+>   github.com/kataras/iris/v12@v12.1.8/core/errgroup/errgroup.go:109:9: undefined: errors.Unwrap
+>
+> **Workaround**:  
+>   Avoid using `iris` codes in `svr` templates.
+
 
 
 ## Includes:
