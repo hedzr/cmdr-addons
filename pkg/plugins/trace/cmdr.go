@@ -4,6 +4,7 @@ package trace
 
 import (
 	"github.com/hedzr/cmdr"
+	"github.com/hedzr/logex/trace"
 )
 
 // WithTraceEnable enables a minimal `trace` option at cmdr Root Command Level.
@@ -24,9 +25,9 @@ func WithTraceEnable(enabled bool) cmdr.ExecOption {
 						// fmt.Printf("trace: %v\n", value)
 						b := cmdr.ToBool(value)
 						if b {
-							_ = Start()
+							_ = trace.Start()
 							root.AppendPostActions(func(cmd *cmdr.Command, args []string) {
-								Stop()
+								trace.Stop()
 							})
 						}
 					}).
