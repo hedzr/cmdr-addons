@@ -2,6 +2,8 @@ module github.com/hedzr/cmdr-addons
 
 go 1.14
 
+// replace github.com/hedzr/log => ../log
+
 // replace github.com/hedzr/logex => ../logex
 
 // replace github.com/hedzr/cmdr => ../cmdr
@@ -15,8 +17,8 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gorilla/mux v1.7.4
-	github.com/hedzr/cmdr v1.7.0
-	github.com/hedzr/logex v1.2.0
+	github.com/hedzr/cmdr v1.7.1
+	github.com/hedzr/log v0.1.11
 	github.com/imkira/go-interpol v1.1.0 // indirect
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/kardianos/service v1.0.0
