@@ -66,14 +66,16 @@ func (p *Program) prepareAppDirs() (err error) {
 	for _, pdir := range []string{"/var/lib", "/var/log", "/var/run"} {
 		dir := path.Join(pdir, p.Config.Name)
 		if !cmdr.FileExists(dir) {
-			fmt.Printf(`The directory %q needs be created via sudo priviledge, so the OS account password will be prompted via 'sudo mkdir %q':`, dir, dir)
+			fmt.Printf(`The directory %q needs be created via sudo priviledge, 
+so the OS account password will be prompted via:
+'sudo mkdir %q':`, dir, dir)
 			_, _, err = sudo("mkdir", dir)
 			_, _, err = sudo("chown", "-R", currUser.Username, dir)
 			_, _, err = sudo("chmod", "-R", "0770", dir)
 		}
 	}
 
-	if !cmdr.FileExists(p.EnvFileName()) {
+	if !cmdr.FileExists(p.EnvFileName()) && runtime.GOOS == "linux" {
 		// var f *os.File
 		// f, err = os.OpenFile(p.EnvFileName(), os.O_CREATE|os.O_WRONLY, 0770)
 		// if err != nil {
@@ -81,7 +83,10 @@ func (p *Program) prepareAppDirs() (err error) {
 		// }
 		// defer f.Close()
 		// _, _ = f.WriteString(fmt.Sprintf("# default config file for daemon %q",p.Config.Name))
-		fmt.Printf(`The env-file %q should be present, we will 'touch' it via sudo priviledge, so the OS account password will be prompted via 'sudo mkdir %q':`, p.EnvFileName(), p.EnvFileName())
+		fmt.Printf(`The env-file %q should be present, 
+we will 'touch' it via sudo priviledge, 
+so the OS account password will be prompted via:
+'sudo mkdir %q':`, p.EnvFileName(), p.EnvFileName())
 		_, _, err = sudo("touch", p.EnvFileName())
 	}
 

@@ -4,7 +4,7 @@ package trace
 
 import (
 	"github.com/hedzr/cmdr"
-	"github.com/hedzr/logex/trace"
+	"github.com/hedzr/log/trace"
 )
 
 // WithTraceEnable enables a minimal `trace` option at cmdr Root Command Level.
