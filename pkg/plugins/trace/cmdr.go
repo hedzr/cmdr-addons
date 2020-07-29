@@ -16,8 +16,8 @@ func WithTraceEnable(enabled bool) cmdr.ExecOption {
 
 			if enabled {
 				// attaches `--trace` to root command
-				cmdr.NewBool(false).
-					Titles("trace", "tr").
+				cmdr.NewBool().
+					Titles("trace", "trace", "tr").
 					Description("enable trace mode for tcp/mqtt send/recv data dump").
 					Group(cmdr.SysMgmtGroup).
 					EnvKeys("TRACE").
