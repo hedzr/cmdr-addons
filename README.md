@@ -2,6 +2,7 @@
 
 ![Go](https://github.com/hedzr/cmdr-addons/workflows/Go/badge.svg)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/hedzr/cmdr-addons.svg?label=release)](https://github.com/hedzr/cmdr-addons/releases)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhedzr%2Fcmdr-addons.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhedzr%2Fcmdr-addons?ref=badge_shield)
 
 see also [`cmdr`](https://github.com/hedzr/cmdr).
 
@@ -71,3 +72,6 @@ MIT
 
 
 
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhedzr%2Fcmdr-addons.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhedzr%2Fcmdr-addons?ref=badge_large)
