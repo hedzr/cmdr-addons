@@ -1,9 +1,12 @@
-# Addons for `cmdr`
+# cmdr-addons: Addons for `cmdr`
 
 ![Go](https://github.com/hedzr/cmdr-addons/workflows/Go/badge.svg)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/hedzr/cmdr-addons.svg?label=release)](https://github.com/hedzr/cmdr-addons/releases)
 
 see also [`cmdr`](https://github.com/hedzr/cmdr).
+
+> **NOTE**  
+> The `cmdr-addons` version is following `cmdr`'s now.
 
 ## Prerequisites
 
@@ -27,6 +30,14 @@ golang 1.13+ ONLY!
 
 - sample app:
   For examples, see also: [the example app: service](https://github.com/hedzr/cmdr-examples/tree/master/examples/service)
+
+#### `svr`
+
+The wrapped http2 server with multiple 3rd multiplexers (echo, gin, ...).
+
+sample app:
+
+[the example app: service](https://github.com/hedzr/cmdr-examples/tree/master/examples/service)
 
 
 #### `trace`

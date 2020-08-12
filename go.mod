@@ -17,7 +17,7 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gorilla/mux v1.7.4
-	github.com/hedzr/cmdr v1.7.3
+	github.com/hedzr/cmdr v1.7.6
 	github.com/hedzr/log v0.1.15
 	github.com/imkira/go-interpol v1.1.0 // indirect
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
@@ -33,7 +33,6 @@ require (
 	github.com/pkg/term v0.0.0-20200520122047-c3ffed290a03 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	github.com/sirupsen/logrus v1.6.0
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/valyala/fasthttp v1.15.1 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
