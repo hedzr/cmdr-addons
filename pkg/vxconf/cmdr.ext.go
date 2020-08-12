@@ -62,6 +62,6 @@ func LoadSectionTo(runMode, sectionKeyPath string, configHolder interface{}) (er
 		return
 	}
 
-	// logrus.Debugf("configuration section got: %v", configHolder)
+	// cmdr.Logger.Debugf("configuration section got: %v", configHolder)
 	return
 }

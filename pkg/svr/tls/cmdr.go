@@ -6,7 +6,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"github.com/hedzr/cmdr"
-	"github.com/sirupsen/logrus"
 	"gopkg.in/hedzr/errors.v2"
 	"io/ioutil"
 	"net"
@@ -130,7 +129,7 @@ func (s *CmdrTLSConfig) InitTLSConfigFromConfigFile(appTag, prefix string) {
 		s.Key = cmdr.GetStringRP(prefix, "key")
 
 		for _, loc := range cmdr.GetStringSliceRP(prefix, "locations") {
-			logrus.Debugf("> tls - testing loc: %v", loc)
+			cmdr.Logger.Debugf("> tls - testing loc: %v", loc)
 			if s.Cacert != "" && cmdr.FileExists(path.Join(loc, s.Cacert)) {
 				s.Cacert = path.Join(loc, s.Cacert)
 			} else if s.Cacert != "" {
@@ -159,8 +158,8 @@ func (s *CmdrTLSConfig) InitTLSConfigFromConfigFile(appTag, prefix string) {
 			s.MinTLSVersion = tls.VersionTLS12
 		}
 
-		logrus.Debugf("> cfg_dir: %v / %v", path.Dir(cmdr.GetUsedConfigFile()), os.Getenv("CFG_DIR"))
-		logrus.Debugf("> tls matched: %+v", s)
+		cmdr.Logger.Debugf("> cfg_dir: %v / %v", path.Dir(cmdr.GetUsedConfigFile()), os.Getenv("CFG_DIR"))
+		cmdr.Logger.Debugf("> tls matched: %+v", s)
 	}
 }
 
@@ -182,7 +181,7 @@ func (s *CmdrTLSConfig) ToServerTLSConfig() (config *tls.Config) {
 			}
 		}
 	} else {
-		logrus.Errorf("%+v", err)
+		cmdr.Logger.Errorf("%+v", err)
 	}
 	return config
 }
@@ -249,7 +248,7 @@ func (s *CmdrTLSConfig) NewTLSListener(l net.Listener) (listener net.Listener, e
 		var config *tls.Config
 		config, err = s.newTLSConfig()
 		if err != nil {
-			logrus.Fatal(err)
+			cmdr.Logger.Fatalf("error: %v", err)
 		}
 		listener = tls.NewListener(l, config)
 	}
@@ -290,11 +289,11 @@ func (s *CmdrTLSConfig) Dial(network, addr string) (conn net.Conn, err error) {
 			cfg.InsecureSkipVerify = true
 		}
 
-		logrus.Printf("Connecting to %s over TLS...\n", addr)
+		cmdr.Logger.Printf("Connecting to %s over TLS...\n", addr)
 		// Use the tls.Config here in http.Transport.TLSClientConfig
 		conn, err = tls.Dial(network, addr, cfg)
 	} else {
-		logrus.Printf("Connecting to %s...\n", addr)
+		cmdr.Logger.Printf("Connecting to %s...\n", addr)
 		conn, err = net.Dial(network, addr)
 	}
 	return

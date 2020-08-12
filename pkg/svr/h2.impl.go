@@ -10,10 +10,8 @@ import (
 	"github.com/hedzr/cmdr-addons/pkg/plugins/dex"
 	"github.com/hedzr/cmdr-addons/pkg/plugins/dex/sig"
 	tls2 "github.com/hedzr/cmdr-addons/pkg/svr/tls"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/acme/autocert"
 	"gopkg.in/hedzr/errors.v2"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -39,7 +37,7 @@ func (d *daemonImpl) checkAndEnableAutoCert(config *tls2.CmdrTLSConfig) (tlsConf
 	}
 
 	if cmdr.GetBoolR("server.autocert.enabled") {
-		logrus.Debugf("...autocert enabled")
+		cmdr.Logger.Debugf("...autocert enabled")
 		d.certManager = &autocert.Manager{
 			Prompt:     autocert.AcceptTOS,
 			HostPolicy: autocert.HostWhitelist(d.domains()...), // 测试时使用的域名：example.com
@@ -47,7 +45,7 @@ func (d *daemonImpl) checkAndEnableAutoCert(config *tls2.CmdrTLSConfig) (tlsConf
 		}
 		go func() {
 			if err := http.ListenAndServe(":80", d.certManager.HTTPHandler(nil)); err != nil {
-				logrus.Fatal("autocert tool listening on :80 failed.", err)
+				cmdr.Logger.Fatalf("autocert tool listening on :80 failed: %v", err)
 			}
 		}()
 		tlsConfig.GetCertificate = d.certManager.GetCertificate
@@ -62,7 +60,7 @@ func (d *daemonImpl) enableGracefulShutdown(srv *http.Server, stopCh, doneCh cha
 		for {
 			select {
 			case <-stopCh:
-				logrus.Debugf("...shutdown going on.")
+				cmdr.Logger.Debugf("...shutdown going on.")
 				d.shutdown(srv)
 				<-doneCh
 				return
@@ -76,9 +74,9 @@ func (d *daemonImpl) shutdown(srv *http.Server) {
 	ctx, cancelFunc := context.WithTimeout(context.TODO(), 8*time.Second)
 	defer cancelFunc()
 	if err := srv.Shutdown(ctx); err != nil {
-		logrus.Error("Shutdown failed: ", err)
+		cmdr.Logger.Errorf("Shutdown failed: %v", err)
 	} else {
-		logrus.Debugf("Shutdown ok.")
+		cmdr.Logger.Debugf("Shutdown ok.")
 	}
 }
 
@@ -97,9 +95,9 @@ func (d *daemonImpl) enterLoop(prog *dex.Program, stopCh, doneCh chan struct{}, 
 		break
 
 	default:
-		log.Printf("daemon.dex ServeSignals, pid = %v", os.Getpid())
+		cmdr.Logger.Printf("daemon.dex ServeSignals, pid = %v", os.Getpid())
 		if err = sig.ServeSignals(); err != nil {
-			log.Println("daemon.dex Error:", err)
+			cmdr.Logger.Errorf("daemon.dex Error: %v", err)
 		}
 	}
 
@@ -108,9 +106,9 @@ func (d *daemonImpl) enterLoop(prog *dex.Program, stopCh, doneCh chan struct{}, 
 	// }
 
 	if err != nil {
-		log.Fatal("daemon.dex terminated.", err)
+		cmdr.Logger.Fatalf("daemon.dex terminated: %v", err)
 	}
-	log.Println("daemon.dex terminated.")
+	cmdr.Logger.Printf("daemon.dex terminated.")
 
 	return
 }
@@ -119,7 +117,7 @@ func (d *daemonImpl) enterLoop(prog *dex.Program, stopCh, doneCh chan struct{}, 
 // listener: a copy from parent linux process, just for live reload.
 func (d *daemonImpl) onRunHttp2Server(prog *dex.Program, stopCh, doneCh chan struct{}, hotReloadListener net.Listener) (err error) {
 	d.appTag = prog.Command.GetRoot().AppName
-	logrus.Debugf("%q daemon OnRun, pid = %v, ppid = %v", d.appTag, os.Getpid(), os.Getppid())
+	cmdr.Logger.Debugf("%q daemon OnRun, pid = %v, ppid = %v", d.appTag, os.Getpid(), os.Getppid())
 
 	// Tweak configuration values here.
 	var (
@@ -128,15 +126,15 @@ func (d *daemonImpl) onRunHttp2Server(prog *dex.Program, stopCh, doneCh chan str
 		tlsConfig = d.checkAndEnableAutoCert(config)
 	)
 
-	logrus.Tracef("used config file: %v", cmdr.GetUsedConfigFile())
-	logrus.Tracef("logger level: %v / %v", logrus.GetLevel(), cmdr.GetLoggerLevel())
+	cmdr.Logger.Tracef("used config file: %v", cmdr.GetUsedConfigFile())
+	cmdr.Logger.Tracef("logger level: %v", cmdr.GetLoggerLevel())
 
 	if config.IsServerCertValid() || tlsConfig.GetCertificate == nil {
 		port = cmdr.GetIntRP(d.appTag, "server.ports.tls")
 	}
 
 	if port == 0 {
-		logrus.Fatal("port not defined")
+		cmdr.Logger.Fatalf("port not defined.")
 	}
 	addr := fmt.Sprintf(":%d", port) // ":3300"
 
@@ -166,7 +164,7 @@ func (d *daemonImpl) onRunHttp2Server(prog *dex.Program, stopCh, doneCh chan str
 	default:
 		d.routerImpl = newStdMux()
 	}
-	logrus.Printf("serverType: %v, %v", serverType, d.Type)
+	cmdr.Logger.Printf("serverType: %v, %v", serverType, d.Type)
 
 	d.routerImpl.BuildRoutes()
 
@@ -192,11 +190,11 @@ func (d *daemonImpl) onRunHttp2Server(prog *dex.Program, stopCh, doneCh chan str
 		// this routine will be terminated safely via golang http shutdown gracefully.
 
 		if err = d.routerImpl.PreServe(); err != nil {
-			logrus.Fatalf("%+v", err)
+			cmdr.Logger.Fatalf("%+v", err)
 		}
 		defer func() {
 			if err = d.routerImpl.PostServe(); err != nil {
-				logrus.Fatalf("%+v", err)
+				cmdr.Logger.Fatalf("%+v", err)
 			}
 		}()
 
@@ -204,22 +202,22 @@ func (d *daemonImpl) onRunHttp2Server(prog *dex.Program, stopCh, doneCh chan str
 		// run with TLS.
 		// Exactly how you would run an HTTP/1.1 server with TLS connection.
 		if config.IsServerCertValid() || srv.TLSConfig.GetCertificate == nil {
-			logrus.Printf("Serving on %v with HTTPS...", addr)
+			cmdr.Logger.Printf("Serving on %v with HTTPS...", addr)
 			// if cmdr.FileExists("ci/certs/server.cert") && cmdr.FileExists("ci/certs/server.key") {
 			if err = d.serve(prog, srv, hotReloadListener, config.Cert, config.Key); err != http.ErrServerClosed && err != nil {
 				if dex.IsErrorAddressAlreadyInUse(err) {
 					if present, process := dex.FindDaemonProcess(); present {
-						logrus.Fatalf("cannot serve, last pid=%v, error is: %+v", process.Pid, err)
+						cmdr.Logger.Fatalf("cannot serve, last pid=%v, error is: %+v", process.Pid, err)
 					}
 				}
-				logrus.Fatalf("listen at port %v failed: %v", port, err)
+				cmdr.Logger.Fatalf("listen at port %v failed: %v", port, err)
 			}
 			// if err = d.serve(srv, hotReloadListener, "ci/certs/server.cert", "ci/certs/server.key"); err != http.ErrServerClosed {
-			// 	logrus.Fatal(err)
+			// 	cmdr.Logger.Fatal(err)
 			// }
-			logrus.Println("end")
+			cmdr.Logger.Printf("end")
 			// 		} else {
-			// 			logrus.Fatalf(`ci/certs/server.{cert,key} NOT FOUND under '%s'. You might generate its at command line:
+			// 			cmdr.Logger.Fatalf(`ci/certs/server.{cert,key} NOT FOUND under '%s'. You might generate its at command line:
 			//
 			// [ -d ci/certs ] || mkdir -p ci/certs
 			// openssl genrsa -out ci/certs/server.key 2048
@@ -228,11 +226,11 @@ func (d *daemonImpl) onRunHttp2Server(prog *dex.Program, stopCh, doneCh chan str
 			// 			`, cmdr.GetCurrentDir())
 			// 		}
 		} else {
-			logrus.Printf("Serving on %v with HTTP...", addr)
+			cmdr.Logger.Printf("Serving on %v with HTTP...", addr)
 			if err = d.serve(prog, srv, hotReloadListener, "", ""); err != http.ErrServerClosed && err != nil {
-				logrus.Fatalf("%+v", err)
+				cmdr.Logger.Fatalf("%+v", err)
 			}
-			logrus.Println("end")
+			cmdr.Logger.Printf("end")
 		}
 	}()
 
@@ -259,7 +257,7 @@ func (d *daemonImpl) serve(prog *dex.Program, srv *http.Server, listener net.Lis
 					return err
 				}
 			}
-			logrus.Infof("listening on unix sock file: %v", sf)
+			cmdr.Logger.Infof("listening on unix sock file: %v", sf)
 			listener, err = net.Listen("unix", sf)
 			if err != nil {
 				err = errors.New("Cannot bind to unix sock %q", sf).Attach(err)
@@ -278,7 +276,7 @@ func (d *daemonImpl) serve(prog *dex.Program, srv *http.Server, listener net.Lis
 		if h2listener != nil {
 			h2listener.Close()
 		}
-		logrus.Printf("h2listener closed, pid=%v", os.Getpid())
+		cmdr.Logger.Printf("h2listener closed, pid=%v", os.Getpid())
 	}()
 
 	h2listener = listener
@@ -287,7 +285,7 @@ func (d *daemonImpl) serve(prog *dex.Program, srv *http.Server, listener net.Lis
 
 func (d *daemonImpl) handle(w http.ResponseWriter, r *http.Request) {
 	// Log the request protocol
-	log.Printf("Got connection: %s", r.Proto)
+	cmdr.Logger.Printf("Got connection: %s", r.Proto)
 	// Send a message back to the client
 	_, _ = w.Write([]byte("Hello"))
 }

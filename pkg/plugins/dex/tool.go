@@ -7,7 +7,6 @@ package dex
 import (
 	"bytes"
 	"github.com/hedzr/cmdr-addons/pkg/plugins/dex/sig"
-	"github.com/sirupsen/logrus"
 	"gopkg.in/hedzr/errors.v2"
 	"net"
 	"os"
@@ -20,7 +19,7 @@ func tplApply(tmpl string, data interface{}) string {
 	var w = new(bytes.Buffer)
 	var tpl = template.Must(template.New("y").Parse(tmpl))
 	if err := tpl.Execute(w, data); err != nil {
-		logrus.Errorf("tpl execute error: %v", err)
+		pd.log.Errorf("tpl execute error: %v", err)
 	}
 	return w.String()
 }
@@ -42,7 +41,7 @@ func isRootUser() bool {
 func shellRunAuto(name string, arg ...string) error {
 	output, err := shellRun(name, arg...)
 	if err != nil {
-		logrus.Fatalf("shellRunAuto err: %v\n\noutput:\n%v", err, output.String())
+		pd.log.Fatalf("shellRunAuto err: %v\n\noutput:\n%v", err, output.String())
 	}
 	return err
 }

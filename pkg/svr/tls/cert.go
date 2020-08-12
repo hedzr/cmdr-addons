@@ -11,7 +11,6 @@ import (
 	"encoding/pem"
 	"fmt"
 	"github.com/hedzr/cmdr"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"math/big"
 	"net"
@@ -152,13 +151,13 @@ func newCaCerts(outputDir string, notBefore, notAfter time.Time, serialNumberLim
 	caPath = path.Join(outputDir, rootCertFileName)
 
 	if cmdr.FileExists(caKeyPath) && cmdr.FileExists(caPath) {
-		logrus.Infof("ignore recreating certs: %v, %v", caKeyPath, caPath)
+		cmdr.Logger.Infof("ignore recreating certs: %v, %v", caKeyPath, caPath)
 		return // exists, ignore creating
 	}
 
 	serialNumber, err = rand.Int(rand.Reader, serialNumberLimit)
 	if err != nil {
-		logrus.Fatalf("failed to generate serial number: %s", err)
+		cmdr.Logger.Fatalf("failed to generate serial number: %s", err)
 	}
 
 	rootKey, err = ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
@@ -209,7 +208,7 @@ func newLeafCerts(outputDir string, notBefore, notAfter time.Time, serialNumberL
 	caPath = path.Join(outputDir, rootCertFileName)
 
 	if cmdr.FileExists(cKeyPath) && cmdr.FileExists(cPath) {
-		logrus.Infof("ignore recreating certs: %v, %v", cKeyPath, cPath)
+		cmdr.Logger.Infof("ignore recreating certs: %v, %v", cKeyPath, cPath)
 		return // exists, ignore creating
 	}
 
@@ -221,7 +220,7 @@ func newLeafCerts(outputDir string, notBefore, notAfter time.Time, serialNumberL
 
 	serialNumber, err = rand.Int(rand.Reader, serialNumberLimit)
 	if err != nil {
-		logrus.Fatalf("failed to generate serial number: %s", err)
+		cmdr.Logger.Fatalf("failed to generate serial number: %s", err)
 	}
 
 	pkixName.CommonName = leafCommonName
@@ -271,7 +270,7 @@ func newClientCerts(outputDir string, notBefore, notAfter time.Time, rootTemplat
 	cPath = path.Join(outputDir, clientCertFileName)
 
 	if cmdr.FileExists(cKeyPath) && cmdr.FileExists(cPath) {
-		logrus.Infof("ignore recreating certs: %v, %v", cKeyPath, cPath)
+		cmdr.Logger.Infof("ignore recreating certs: %v, %v", cKeyPath, cPath)
 		return // exists, ignore creating
 	}
 
@@ -325,34 +324,34 @@ func keyToFile(filename string, key *ecdsa.PrivateKey) {
 func certToFile(filename string, derBytes []byte) {
 	certOut, err := os.Create(filename)
 	if err != nil {
-		logrus.Fatalf("failed to open %v for writing: %s", filename, err)
+		cmdr.Logger.Fatalf("failed to open %v for writing: %s", filename, err)
 	}
 	if err := pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes}); err != nil {
-		logrus.Fatalf("failed to write data to %v: %s", filename, err)
+		cmdr.Logger.Fatalf("failed to write data to %v: %s", filename, err)
 	}
 	if err := certOut.Close(); err != nil {
-		logrus.Fatalf("error closing %v: %s", filename, err)
+		cmdr.Logger.Fatalf("error closing %v: %s", filename, err)
 	}
 }
 
 func appendCertToFile(filename, appendFilename string) {
 	certOut, err := os.OpenFile(filename, os.O_RDWR|os.O_APPEND, 0644)
 	if err != nil {
-		logrus.Fatalf("failed to open %v for writing: %s", filename, err)
+		cmdr.Logger.Fatalf("failed to open %v for writing: %s", filename, err)
 	}
 
 	var c []byte
 	c, err = ioutil.ReadFile(appendFilename)
 	if err != nil {
-		logrus.Fatalf("failed to open %v for reading: %s", appendFilename, err)
+		cmdr.Logger.Fatalf("failed to open %v for reading: %s", appendFilename, err)
 	}
 
 	_, err = certOut.Write(c)
 	if err != nil {
-		logrus.Fatalf("failed to write data to %v: %s", filename, err)
+		cmdr.Logger.Fatalf("failed to write data to %v: %s", filename, err)
 	}
 	if err := certOut.Close(); err != nil {
-		logrus.Fatalf("error closing %v: %s", filename, err)
+		cmdr.Logger.Fatalf("error closing %v: %s", filename, err)
 	}
 }
 

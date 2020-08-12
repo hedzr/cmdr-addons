@@ -7,8 +7,8 @@ import (
 	"github.com/hedzr/cmdr"
 	"github.com/hedzr/cmdr-addons/pkg/plugins/dex/sig"
 	"github.com/hedzr/cmdr/conf"
+	"github.com/hedzr/log"
 	"github.com/kardianos/service"
-	"github.com/sirupsen/logrus"
 	"os"
 	"os/user"
 	"path"
@@ -23,6 +23,8 @@ type Program struct {
 	Config  *service.Config
 	Service service.Service
 	Logger  service.Logger
+
+	log log.Logger
 
 	// the arguments of cmdr entry.
 	Command *cmdr.Command
@@ -125,7 +127,7 @@ func (p *Program) SocketFileName() string {
 	// if runtime.GOOS == "darwin" {
 	// 	return ""
 	// }
-	// logrus.Infof("env.APPNAME = %v, conf.AppName = %v", os.Getenv("APPNAME"), conf.AppName)
+	// p.log.Infof("env.APPNAME = %v, conf.AppName = %v", os.Getenv("APPNAME"), conf.AppName)
 	return cmdr.GetStringR("server.start.socket-file",
 		os.ExpandEnv("/var/run/$APPNAME/$APPNAME.sock"))
 }
@@ -137,7 +139,7 @@ func (p *Program) PidFileName() string {
 	// if runtime.GOOS == "darwin" {
 	// 	return ""
 	// }
-	logrus.Infof("env.APPNAME = %v, conf.AppName = %v", os.Getenv("APPNAME"), conf.AppName)
+	p.log.Infof("env.APPNAME = %v, conf.AppName = %v", os.Getenv("APPNAME"), conf.AppName)
 	return os.ExpandEnv("/var/run/$APPNAME/$APPNAME.pid")
 }
 

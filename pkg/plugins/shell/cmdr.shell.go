@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/c-bata/go-prompt"
 	"github.com/hedzr/cmdr"
-	"github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
 	"strings"
@@ -47,7 +46,7 @@ func WithShellModule() cmdr.ExecOption {
 }
 
 func doShellModeAction(cmd *cmdr.Command, args []string) (err error) {
-	// logrus.Println(cmdr.GetStringR("shell.Sample"))
+	// cmdr.Logger.Println(cmdr.GetStringR("shell.Sample"))
 	switch cmdr.GetStringR("shell.Sample") {
 	case "demo-0":
 		run0()
@@ -99,13 +98,13 @@ func completer(in prompt.Document) []prompt.Suggest {
 	// if cmd != nil {
 	// 	names = cmd.GetTitleNames()
 	// }
-	// logrus.Debugf("in: %v, cmd: %q, err = %v", in, names, err)
+	// cmdr.Logger.Debugf("in: %v, cmd: %q, err = %v", in, names, err)
 
 	if err != nil || cmd == nil {
 		return prompt.FilterHasPrefix([]prompt.Suggest{}, in.GetWordBeforeCursor(), true)
 	}
 
-	// logrus.Debugf("cmd = %v", cmd)
+	// cmdr.Logger.Debugf("cmd = %v", cmd)
 	return prompt.FilterHasPrefix(buildSuggestsFor(in.Text, cmd), in.GetWordBeforeCursor(), true)
 }
 
@@ -122,7 +121,7 @@ func buildSuggestsFor(text string, command *cmdr.Command) (ret []prompt.Suggest)
 	// for _, r := range ret {
 	// 	sa = append(sa, r.Text)
 	// }
-	// logrus.Debugf("%q: cmd.Titles: %q; ret: %v | %v", text, command.GetTitleNames(), len(ret), sa)
+	// cmdr.Logger.Debugf("%q: cmd.Titles: %q; ret: %v | %v", text, command.GetTitleNames(), len(ret), sa)
 
 	return
 }
@@ -131,7 +130,7 @@ func buildSuggestsFor(text string, command *cmdr.Command) (ret []prompt.Suggest)
 func ExecuteAndGetResult(s string) string {
 	s = strings.TrimSpace(s)
 	if s == "" {
-		logrus.Debug("you need to pass the something arguments")
+		cmdr.Logger.Debugf("you need to pass the something arguments")
 		return ""
 	}
 
@@ -140,7 +139,7 @@ func ExecuteAndGetResult(s string) string {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = out
 	if err := cmd.Run(); err != nil {
-		logrus.Error(err.Error())
+		cmdr.Logger.Errorf("%v", err.Error())
 		return ""
 	}
 	r := string(out.Bytes())

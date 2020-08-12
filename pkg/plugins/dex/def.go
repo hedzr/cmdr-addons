@@ -15,22 +15,22 @@ type Daemon interface {
 	// Config() (config *service.Config)
 
 	// OnRun will be invoked when daemon being started, run/fork at foreground, hot reload ...
-	OnRun(prog *Program, stopCh, doneCh chan struct{}, hotReloadListener net.Listener) (err error)
-	OnStop(prog *Program) (err error)
-	OnReload(prog *Program)
-	OnStatus(prog *Program, p *os.Process) (err error)
-	OnInstall(prog *Program) (err error)
-	OnUninstall(prog *Program) (err error)
+	OnRun(program *Program, stopCh, doneCh chan struct{}, hotReloadListener net.Listener) (err error)
+	OnStop(program *Program) (err error)
+	OnReload(program *Program)
+	OnStatus(program *Program, p *os.Process) (err error)
+	OnInstall(program *Program) (err error)
+	OnUninstall(program *Program) (err error)
 
 	// OnReadConfigFromCommandLine(root *cmdr.RootCommand)
-	BeforeServiceStart(prog *Program, root *cmdr.Command) (err error)
-	AfterServiceStop(prog *Program, root *cmdr.Command) (err error)
-	OnCmdrPrepare(prog *Program, root *cmdr.RootCommand) (err error)
+	BeforeServiceStart(program *Program, root *cmdr.Command) (err error)
+	AfterServiceStop(program *Program, root *cmdr.Command) (err error)
+	OnCmdrPrepare(program *Program, root *cmdr.RootCommand) (err error)
 }
 
 // HotReloadable enables hot-restart/hot-reload feature
 type HotReloadable interface {
-	OnHotReload(prog *Program) (err error)
+	OnHotReload(program *Program) (err error)
 }
 
 var daemonImpl Daemon

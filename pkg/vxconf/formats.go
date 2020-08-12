@@ -4,7 +4,7 @@ package vxconf
 
 import (
 	"encoding/json"
-	"github.com/sirupsen/logrus"
+	"github.com/hedzr/cmdr"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 )
@@ -18,7 +18,7 @@ func JsonToString(in interface{}, pretty bool) string {
 		b, err = json.Marshal(in)
 	}
 	if err != nil {
-		logrus.Errorf("json decode string failed: %v", err)
+		cmdr.Logger.Errorf("json decode string failed: %v", err)
 		return "<error-json-object>"
 	} else {
 		return string(b)
@@ -34,7 +34,7 @@ func YamlToString(in interface{}, pretty bool) string {
 		b, err = yaml.Marshal(in)
 	}
 	if err != nil {
-		logrus.Errorf("yaml decode string failed: %v", err)
+		cmdr.Logger.Errorf("yaml decode string failed: %v", err)
 		return "<error-yaml-object>"
 	} else {
 		return string(b)

@@ -62,7 +62,7 @@ func (d *irisImpl) Serve(srv *http.Server, listener net.Listener, certFile, keyF
 	// 	su := d.irisApp.NewHost(srv)
 	// 	if netutil.IsTLS(su.Server) {
 	// 		h2listener = tls.NewListener(listener, su.Server.TLSConfig)
-	// 		// logrus.Debugf("new h2listener: %v", su.Server.TLSConfig)
+	// 		// cmdr.Logger.Debugf("new h2listener: %v", su.Server.TLSConfig)
 	// 		su.Configure(func(su *host.Supervisor) {
 	// 			rs := reflect.ValueOf(su).Elem()
 	// 			// rf := rs.FieldByName("manuallyTLS")

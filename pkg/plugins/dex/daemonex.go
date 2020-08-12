@@ -5,9 +5,8 @@ package dex
 import (
 	"fmt"
 	"github.com/hedzr/cmdr"
+	"github.com/hedzr/log"
 	"github.com/kardianos/service"
-	"github.com/sirupsen/logrus"
-	"log"
 	"os"
 	"path"
 	"runtime"
@@ -29,6 +28,7 @@ func WithDaemon(daemonImplObject Daemon,
 			Description: "The Daemon/Service here",
 		},
 		daemon: daemonImplObject,
+		log: log.NewDummyLogger(),
 		// Service: nil,
 		// Logger:  nil,
 		// Command: nil,
@@ -42,7 +42,7 @@ func WithDaemon(daemonImplObject Daemon,
 
 	// set appname with daemon name
 	os.Setenv("APPNAME", pd.Config.Name)
-	// logrus.Printf("set appname with daemon name: %q", pd.Config.Name)
+	// pd.log.Printf("set appname with daemon name: %q", pd.Config.Name)
 
 	if len(pd.Config.Arguments) == 0 {
 		pd.Config.Arguments = []string{"server", "run", "--in-daemon"}
@@ -71,54 +71,12 @@ func WithDaemon(daemonImplObject Daemon,
 			attachPostAction(root, pd.postActions...)
 
 			if err := cmdrPrepare(pd.daemon, root); err != nil {
-				logrus.Fatal(err)
+				pd.log.Fatalf("%v", err)
 			}
 
 		})
 	}
 }
-
-// Opt is functional option type
-type Opt func()
-
-func WithServiceConfig(config *service.Config) Opt {
-	return func() {
-		pd.Config = config
-	}
-}
-
-// WithLoggerForward forwards all log to the out and err files.
-// Typically the files could be found at `/var/log/<appname>/`.
-func WithLoggerForward(force bool) Opt {
-	return func() {
-		pd.ForwardLogToFile = force
-	}
-}
-
-func WithCommandsModifier(modifier func(daemonServerCommand *cmdr.Command) *cmdr.Command) Opt {
-	return func() {
-		pd.modifier = modifier
-	}
-}
-
-func WithPreAction(action func(cmd *cmdr.Command, args []string) (err error)) Opt {
-	return func() {
-		pd.preActions = append(pd.preActions, action)
-	}
-}
-
-func WithPostAction(action func(cmd *cmdr.Command, args []string)) Opt {
-	return func() {
-		pd.postActions = append(pd.postActions, action)
-	}
-}
-
-// // WithOnGetListener returns tcp/http listener for daemon hot-restarting
-// func WithOnGetListener(fn func() net.Listener) Opt {
-// 	return func() {
-// 		impl.SetOnGetListener(fn)
-// 	}
-// }
 
 func attachPostAction(root *cmdr.RootCommand, postActions ...func(cmd *cmdr.Command, args []string)) {
 	if root.PostAction != nil {
@@ -154,7 +112,7 @@ func attachPreAction(root *cmdr.RootCommand, preActions ...func(cmd *cmdr.Comman
 			logger.Setup(cmd)
 
 			if err := prepare(pd.daemon, root); err != nil {
-				logrus.Fatal(err)
+				pd.log.Fatalf("%v", err)
 			}
 
 			if err = savedPreAction(cmd, args); err != nil {
@@ -173,7 +131,7 @@ func attachPreAction(root *cmdr.RootCommand, preActions ...func(cmd *cmdr.Comman
 			logger.Setup(cmd)
 
 			if err := prepare(pd.daemon, root); err != nil {
-				logrus.Fatal(err)
+				pd.log.Fatalf("%v", err)
 			}
 
 			for _, preAction := range preActions {
@@ -223,11 +181,11 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 
 	// set appname with daemon name
 	os.Setenv("APPNAME", pd.Config.Name)
-	logrus.Printf("set appname with daemon name: %q", pd.Config.Name)
+	pd.log.Printf("set appname with daemon name: %q", pd.Config.Name)
 
 	err = pd.prepareAppDirs()
 	if err != nil {
-		logrus.Fatalf("Cannot prepare the app directories: %+v", err)
+		pd.log.Fatalf("Cannot prepare the app directories: %+v", err)
 		return
 	}
 
@@ -251,13 +209,13 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 
 			err = pd.prepareLogFiles()
 			if err != nil {
-				logrus.Fatalf("Cannot prepare the logging files: %+v", err)
+				pd.log.Fatalf("Cannot prepare the logging files: %+v", err)
 				return
 			}
 
 			if pd.ForwardLogToFile {
-				logrus.Debugf("All logrus logging output will be forwarded to this file: %q.", pd.LogStdoutFileName())
-				logrus.SetOutput(pd.fOut)
+				pd.log.Debugf("All logging output will be forwarded to this file: %q.", pd.LogStdoutFileName())
+				// TODO logrus.SetOutput(pd.fOut)
 			}
 		}
 
@@ -287,7 +245,7 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 		for {
 			err := <-errs
 			if err != nil {
-				log.Print(err)
+				pd.log.Errorf("error: %v", err)
 			}
 		}
 	}()
@@ -325,7 +283,7 @@ func daemonStart(cmd *cmdr.Command, args []string) (err error) {
 func runAsDaemon(cmd *cmdr.Command, args []string) (err error) {
 	err = service.Control(pd.Service, "start")
 	if err != nil {
-		pd.Logger.Errorf("Valid actions: %q\n", service.ControlAction)
+		pd.Logger.Errorf("Valid actions %q: %v\n", service.ControlAction, err)
 		return // log.Fatal(err)
 	}
 	return
@@ -352,7 +310,7 @@ func daemonStop(cmd *cmdr.Command, args []string) (err error) {
 	pd.Command, pd.Args = cmd, args
 	err = service.Control(pd.Service, "stop")
 	if err != nil {
-		pd.Logger.Errorf("Valid actions: %q\n", service.ControlAction)
+		pd.Logger.Errorf("Valid actions %q: %v\n", service.ControlAction, err)
 		// return // log.Fatal(err)
 	}
 
@@ -367,7 +325,7 @@ func daemonRestart(cmd *cmdr.Command, args []string) (err error) {
 	pd.Command, pd.Args = cmd, args
 	err = service.Control(pd.Service, "restart")
 	if err != nil {
-		pd.Logger.Errorf("Valid actions: %q\n", service.ControlAction)
+		pd.Logger.Errorf("Valid actions %q: %v\n", service.ControlAction, err)
 		return // log.Fatal(err)
 	}
 
@@ -410,7 +368,7 @@ func daemonStatus(cmd *cmdr.Command, args []string) (err error) {
 	pd.Logger.Infof("Args: %v", args)
 	// err = service.Control(pd.service, "status")
 	// if err != nil {
-	// 	logrus.Errorf("Valid actions: %q\n", service.ControlAction)
+	// 	pd.log.Errorf("Valid actions: %q\n", service.ControlAction)
 	// 	return // log.Fatal(err)
 	// }
 	var st service.Status
@@ -458,7 +416,7 @@ func daemonInstall(cmd *cmdr.Command, args []string) (err error) {
 	pd.Command, pd.Args = cmd, args
 	err = service.Control(pd.Service, "install")
 	if err != nil {
-		pd.Logger.Errorf("Valid actions: %q\n", service.ControlAction)
+		pd.Logger.Errorf("Valid actions %q: %v\n", service.ControlAction, err)
 		return // log.Fatal(err)
 	}
 
@@ -478,7 +436,7 @@ func daemonUninstall(cmd *cmdr.Command, args []string) (err error) {
 	pd.Command, pd.Args = cmd, args
 	err = service.Control(pd.Service, "uninstall")
 	if err != nil {
-		pd.Logger.Errorf("Valid actions: %q\n", service.ControlAction)
+		pd.Logger.Errorf("Valid actions %q: %v\n", service.ControlAction, err)
 		return // log.Fatal(err)
 	}
 
