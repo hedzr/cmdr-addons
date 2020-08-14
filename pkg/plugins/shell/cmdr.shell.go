@@ -80,7 +80,7 @@ func executor(in string) {
 		os.Exit(0)
 	}
 
-	fmt.Println("Your input: " + in + " | for running " + cmdr.GetExcutablePath())
+	fmt.Println("Your input: " + in + " | for running " + cmdr.GetExecutablePath())
 
 	// cmd := exec.Command("/bin/sh", "-c", cmdr.GetExcutablePath()+" "+in)
 	// cmd.Stdin = os.Stdin
