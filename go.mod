@@ -17,8 +17,8 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gorilla/mux v1.7.4
-	github.com/hedzr/cmdr v1.7.21
-	github.com/hedzr/log v0.2.0
+	github.com/hedzr/cmdr v1.7.23
+	github.com/hedzr/log v0.2.1
 	github.com/imkira/go-interpol v1.1.0 // indirect
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/kardianos/service v1.1.0
@@ -40,7 +40,7 @@ require (
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yudai/pp v2.0.1+incompatible // indirect
-	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
-	gopkg.in/hedzr/errors.v2 v2.1.0
+	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
+	gopkg.in/hedzr/errors.v2 v2.1.1
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
