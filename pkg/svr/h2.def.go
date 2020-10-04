@@ -20,7 +20,7 @@ type (
 	// 	certManager *autocert.Manager
 	// 	Type        muxType
 	// 	mux         *http.ServeMux
-	// 	routerImpl  routerMux
+	// 	routerImpl  RouterMux
 	// 	// router      *gin.Engine
 	// 	// irisApp     *iris.Application
 	// }
