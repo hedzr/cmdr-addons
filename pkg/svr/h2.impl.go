@@ -10,10 +10,13 @@ import (
 	"github.com/hedzr/cmdr-addons/pkg/plugins/dex"
 	"github.com/hedzr/cmdr-addons/pkg/plugins/dex/sig"
 	tls2 "github.com/hedzr/cmdr-addons/pkg/svr/tls"
+	"github.com/hedzr/cmdr/conf"
+	"github.com/kataras/iris/v12/core/host"
 	"golang.org/x/crypto/acme/autocert"
 	"gopkg.in/hedzr/errors.v2"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"runtime"
 	"time"
@@ -80,7 +83,7 @@ func (d *daemonImpl) shutdown(srv *http.Server) {
 	}
 }
 
-func (d *daemonImpl) enterLoop(prog *dex.Program, stopCh, doneCh chan struct{}, listener net.Listener) (err error) {
+func (d *daemonImpl) enterLoop(prg *dex.Program, stopCh, doneCh chan struct{}, listener net.Listener) (err error) {
 	switch runtime.GOOS {
 	case "windows":
 	LOOP:
@@ -115,13 +118,21 @@ func (d *daemonImpl) enterLoop(prog *dex.Program, stopCh, doneCh chan struct{}, 
 
 // onRunHttp2Server NOTE
 // listener: a copy from parent linux process, just for live reload.
-func (d *daemonImpl) onRunHttp2Server(prog *dex.Program, stopCh, doneCh chan struct{}, hotReloadListener net.Listener) (err error) {
-	d.appTag = prog.Command.GetRoot().AppName
+func (d *daemonImpl) onRunHttp2Server(prg *dex.Program, stopCh, doneCh chan struct{}, hotReloadListener net.Listener) (err error) {
+	d.appTag = prg.Command.GetRoot().AppName
+	if conf.AppName != d.appTag && d.appTag != "" {
+		conf.AppName = d.appTag
+		conf.Version = prg.Command.GetRoot().Version
+		conf.ServerTag = d.appTag
+		conf.ServerID = d.appTag
+	}
+
 	cmdr.Logger.Debugf("%q daemon OnRun, pid = %v, ppid = %v", d.appTag, os.Getpid(), os.Getppid())
 
 	// Tweak configuration values here.
 	var (
 		port      = cmdr.GetIntRP(d.appTag, "server.port")
+		portNoTls = 0
 		config    = tls2.NewCmdrTLSConfig(d.appTag, "server.tls", "server.start")
 		tlsConfig = d.checkAndEnableAutoCert(config)
 	)
@@ -132,13 +143,15 @@ func (d *daemonImpl) onRunHttp2Server(prog *dex.Program, stopCh, doneCh chan str
 	if config.IsServerCertValid() || tlsConfig.GetCertificate == nil {
 		port = cmdr.GetIntRP(d.appTag, "server.ports.tls")
 	}
+	portNoTls = cmdr.GetIntRP(d.appTag, "server.ports.default", 0)
 
 	if port == 0 {
 		cmdr.Logger.Fatalf("port not defined.")
 	}
 	addr := fmt.Sprintf(":%d", port) // ":3300"
 
-	serverType := cmdr.GetStringR("server.Mux")
+	serverType := cmdr.GetStringRP(d.appTag, "server.type", "")
+	serverType = cmdr.GetStringR("server.Mux", serverType)
 	switch serverType {
 	case "iris":
 		d.Type = typeIris
@@ -148,23 +161,31 @@ func (d *daemonImpl) onRunHttp2Server(prog *dex.Program, stopCh, doneCh chan str
 		d.Type = typeGin
 	case "gorilla":
 		d.Type = typeGorilla
-	default:
+	case "default":
 		d.Type = typeDefault
+	default:
+		d.Type = typeGin
 	}
 
-	switch d.Type {
-	case typeIris:
-		d.routerImpl = newIris()
-	case typeEcho:
-		d.routerImpl = newEcho()
-	case typeGin:
-		d.routerImpl = newGin()
-	case typeGorilla:
-		d.routerImpl = newGorilla()
-	default:
-		d.routerImpl = newStdMux()
+	if d.routerImpl == nil {
+		switch d.Type {
+		case typeIris:
+			d.routerImpl = newIris()
+		case typeEcho:
+			d.routerImpl = newEcho()
+		case typeGin:
+			d.routerImpl = newGin()
+		case typeGorilla:
+			d.routerImpl = newGorilla()
+		case typeDefault:
+			d.routerImpl = newStdMux()
+		default:
+			d.routerImpl = newGin()
+		}
+		cmdr.Logger.Printf("serverType got: %v, %v", serverType, d.Type)
+	} else {
+		cmdr.Logger.Printf("serverType is: %v, %v | routerImpl was preset.", serverType, d.Type)
 	}
-	cmdr.Logger.Printf("serverType: %v, %v", serverType, d.Type)
 
 	d.routerImpl.BuildRoutes()
 
@@ -189,6 +210,9 @@ func (d *daemonImpl) onRunHttp2Server(prog *dex.Program, stopCh, doneCh chan str
 
 		// this routine will be terminated safely via golang http shutdown gracefully.
 
+		if pps, ok := d.routerImpl.(ForLoggerInitializing); ok {
+			pps.PrePreServe()
+		}
 		if err = d.routerImpl.PreServe(); err != nil {
 			cmdr.Logger.Fatalf("%+v", err)
 		}
@@ -202,9 +226,21 @@ func (d *daemonImpl) onRunHttp2Server(prog *dex.Program, stopCh, doneCh chan str
 		// run with TLS.
 		// Exactly how you would run an HTTP/1.1 server with TLS connection.
 		if config.IsServerCertValid() || srv.TLSConfig.GetCertificate == nil {
-			cmdr.Logger.Printf("Serving on %v with HTTPS...", addr)
+			cmdr.Logger.Printf("> Serving on %v with HTTPS...", addr)
+			if d.Type == typeIris && portNoTls > 0 {
+				// 转发 80 到 https
+				target, _ := url.Parse("https://" + addr)
+				source := fmt.Sprintf("%s:%v", target.Hostname(), portNoTls)
+				go func() {
+					cmdr.Logger.Printf("  > Proxy from %v to HTTPS...", source)
+					err := host.NewProxy(source, target).ListenAndServe()
+					if err != nil {
+						cmdr.Logger.Fatalf("proxy at %v failed: %v", source, err)
+					}
+				}()
+			}
 			// if cmdr.FileExists("ci/certs/server.cert") && cmdr.FileExists("ci/certs/server.key") {
-			if err = d.serve(prog, srv, hotReloadListener, config.Cert, config.Key); err != http.ErrServerClosed && err != nil {
+			if err = d.serve(prg, srv, hotReloadListener, config.Cert, config.Key); err != http.ErrServerClosed && err != nil {
 				if dex.IsErrorAddressAlreadyInUse(err) {
 					if present, process := dex.FindDaemonProcess(); present {
 						cmdr.Logger.Fatalf("cannot serve, last pid=%v, error is: %+v", process.Pid, err)
@@ -227,7 +263,7 @@ func (d *daemonImpl) onRunHttp2Server(prog *dex.Program, stopCh, doneCh chan str
 			// 		}
 		} else {
 			cmdr.Logger.Printf("Serving on %v with HTTP...", addr)
-			if err = d.serve(prog, srv, hotReloadListener, "", ""); err != http.ErrServerClosed && err != nil {
+			if err = d.serve(prg, srv, hotReloadListener, "", ""); err != http.ErrServerClosed && err != nil {
 				cmdr.Logger.Fatalf("%+v", err)
 			}
 			cmdr.Logger.Printf("end")
@@ -238,7 +274,7 @@ func (d *daemonImpl) onRunHttp2Server(prog *dex.Program, stopCh, doneCh chan str
 	return
 }
 
-func (d *daemonImpl) serve(prog *dex.Program, srv *http.Server, listener net.Listener, certFile, keyFile string) (err error) {
+func (d *daemonImpl) serve(prg *dex.Program, srv *http.Server, listener net.Listener, certFile, keyFile string) (err error) {
 	// if srv.shuttingDown() {
 	// 	return http.ErrServerClosed
 	// }
@@ -250,7 +286,7 @@ func (d *daemonImpl) serve(prog *dex.Program, srv *http.Server, listener net.Lis
 
 	if listener == nil {
 		if cmdr.GetBoolR("server.start.socket") {
-			sf := prog.SocketFileName()
+			sf := prg.SocketFileName()
 			if cmdr.GetBoolR("server.start.reset-socket-file") && cmdr.FileExists(sf) {
 				err = os.Remove(sf)
 				if err != nil {

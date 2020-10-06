@@ -1,28 +1,51 @@
 package svr
 
 import (
-	"crypto/tls"
+	"github.com/betacraft/yaag/yaag"
 	"github.com/hedzr/cmdr"
+	"github.com/hedzr/cmdr-addons/pkg/svr/irisyaag"
+	"github.com/hedzr/cmdr/conf"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/core/host"
+	"github.com/kataras/iris/v12/middleware/accesslog"
 	"github.com/kataras/iris/v12/middleware/logger"
 	"github.com/kataras/iris/v12/middleware/recover"
 	"net"
 	"net/http"
+	"path"
+	"time"
 )
 
 func newIris() *irisImpl {
-	d := &irisImpl{}
-	d.init()
+	d := &irisImpl{
+		BaseIrisImpl: NewRouterBaseIrisImpl(),
+	}
 	return d
 }
 
 type irisImpl struct {
-	irisApp *iris.Application
+	BaseIrisImpl
 }
 
-func (d *irisImpl) init() {
-	d.irisApp = iris.New()
+func NewRouterBaseIrisImpl() BaseIrisImpl {
+	d := BaseIrisImpl{}
+	d.init()
+	return d
+}
 
+type BaseIrisImpl struct {
+	irisApp *iris.Application
+	ac      *accesslog.AccessLog
+}
+
+func (d *BaseIrisImpl) init() {
+	app := iris.New()
+	d.irisApp = app
+
+	app.UseRouter(recover.New())
+}
+
+func (d *BaseIrisImpl) PrePreServe() {
 	l := cmdr.GetLoggerLevel()
 	n := "debug"
 	switch l {
@@ -37,27 +60,77 @@ func (d *irisImpl) init() {
 	case cmdr.InfoLevel:
 		n = "info"
 	default:
-		n = "debug"
+	}
+	customLogger := logger.New(logger.Config{
+		// Status displays status code
+		Status: true,
+		// IP displays request's remote address
+		IP: true,
+		// Method displays the http method
+		Method: true,
+		// Path displays the request path
+		Path: true,
+		// Query appends the url query to the Path.
+		Query: true,
+		// Columns: false,
+
+		// if !empty then its contents derives from `ctx.Values().Get("logger_message")
+		// will be added to the logs.
+		MessageContextKeys: []string{"logger_message"},
+
+		// if !empty then its contents derives from `ctx.GetHeader("User-Agent")
+		MessageHeaderKeys: []string{"User-Agent"},
+
+		LogFunc: d.print,
+	})
+
+	app := d.irisApp
+
+	app.Use(customLogger)
+	app.Logger().SetLevel(n)
+	//app.OnAnyErrorCode(customLogger, func(ctx iris.Context) {
+	//	// this should be added to the logs, at the end because of the `logger.Config#MessageContextKey`
+	//	ctx.Values().Set("logger_message",
+	//		"a dynamic message passed to the logs")
+	//	ctx.Writef("My Custom error page")
+	//})
+
+	// Note, it's buffered, so make sure it's closed so it can flush any buffered contents.
+	d.ac = accesslog.File("./access.log")
+	// defer ac.Close()
+	app.UseRouter(d.ac.Handler)
+
+	if cmdr.GetBoolRP(conf.AppName, "server.statics.enabled") {
+		// Serve our front-end and its assets.
+		app.HandleDir(cmdr.GetStringRP(conf.AppName, "server.statics.url"), iris.Dir(cmdr.GetStringRP(conf.AppName, "server.statics.path")))
 	}
 
-	d.irisApp.Use(recover.New())
-	d.irisApp.Use(logger.New())
-	d.irisApp.Logger().SetLevel(n)
+	loc := cmdr.GetStringRP(conf.AppName, "server.statics.path")
+	yaag.Init(&yaag.Config{ // <- IMPORTANT, init the middleware.
+		On:       true,
+		DocTitle: cmdr.AppName + " via Iris",
+		DocPath:  path.Join(loc, "apidoc.html"),
+		BaseUrls: map[string]string{"Production": "", "Staging": ""},
+	})
+	app.UseRouter(irisyaag.New()) // <- IMPORTANT, register the middleware.
 }
 
-func (d *irisImpl) PreServe() (err error) {
+func (d *BaseIrisImpl) print(endTime time.Time, latency time.Duration, status, ip, method, path string, message interface{}, headerMessage interface{}) {
+	cmdr.Logger.Infof("%v %v %v %v %v %v %v %v", endTime, latency, status, ip, method, path, message, headerMessage)
+}
+
+func (d *BaseIrisImpl) PreServe() (err error) {
 	return
 }
 
-func (d *irisImpl) PostServe() (err error) {
+func (d *BaseIrisImpl) PostServe() (err error) {
 	return
 }
 
-func (d *irisImpl) Handler() http.Handler {
-	return d.irisApp
-}
+func (d *BaseIrisImpl) Handler() http.Handler { return d.irisApp }
+func (d *BaseIrisImpl) App() http.Handler     { return d.irisApp }
 
-func (d *irisImpl) Serve(srv *http.Server, listener net.Listener, certFile, keyFile string) (err error) {
+func (d *BaseIrisImpl) Serve(srv *http.Server, listener net.Listener, certFile, keyFile string) (err error) {
 	// return d.irisApp.Run(iris.Raw(func() error {
 	// 	su := d.irisApp.NewHost(srv)
 	// 	if netutil.IsTLS(su.Server) {
@@ -82,11 +155,43 @@ func (d *irisImpl) Serve(srv *http.Server, listener net.Listener, certFile, keyF
 	// }), iris.WithoutServerError(iris.ErrServerClosed))
 
 	if listener != nil {
-		h2listener = tls.NewListener(listener, srv.TLSConfig)
-		return d.irisApp.Run(iris.Listener(h2listener), iris.WithoutServerError(iris.ErrServerClosed))
+		// v1 - http 1.1 with tls:
+		//h2listener = tls.NewListener(listener, srv.TLSConfig)
+		//return d.irisApp.Run(iris.Listener(h2listener), iris.WithoutServerError(iris.ErrServerClosed))
+
+		// v2 - http 2 with iris tls, but h2listener not ready
+		_ = listener.Close()
+		return d.irisApp.Run(d.irisTLSServer(srv), iris.WithoutServerError(iris.ErrServerClosed))
 	}
 
 	return d.irisApp.Run(iris.Server(srv), iris.WithoutServerError(iris.ErrServerClosed))
+}
+
+//type super struct {
+//	*iris.Supervisor
+//}
+//
+//func irisTLSListener(l net.Listener, srv *http.Server, hostConfigs ...host.Configurator) iris.Runner {
+//	return func(app *iris.Application) error {
+//		//app.config.vhost = netutil.ResolveVHost(l.Addr().String())
+//		s:= &super{Supervisor: app.NewHost(srv),}
+//		return s.Configure(hostConfigs...).
+//			ServeTLS(l)
+//	}
+//}
+
+func (d *BaseIrisImpl) irisTLSServer(srv *http.Server, hostConfigs ...host.Configurator) iris.Runner {
+	return func(app *iris.Application) error {
+		host := app.NewHost(srv)
+		host.RegisterOnShutdown(func() {
+			d.ac.Close()
+		})
+		return host.Configure(hostConfigs...).
+			ListenAndServeTLS("", "")
+	}
+}
+
+func (d *BaseIrisImpl) BuildRoutes() {
 }
 
 func (d *irisImpl) BuildRoutes() {
