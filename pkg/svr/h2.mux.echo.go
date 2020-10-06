@@ -94,6 +94,11 @@ func (d *echoImpl) Handler() http.Handler {
 	return d.e
 }
 
+func (d *echoImpl) App() http.Handler {
+	// panic("implement me")
+	return d.e
+}
+
 func (d *echoImpl) Serve(srv *http.Server, listener net.Listener, certFile, keyFile string) (err error) {
 	// panic("implement me")
 	// d.e.Logger.Fatal(d.e.Start(":1323"))

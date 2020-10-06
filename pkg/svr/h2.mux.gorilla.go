@@ -43,6 +43,10 @@ func (d *gorillaImpl) Handler() http.Handler {
 	return d.router
 }
 
+func (d *gorillaImpl) App() http.Handler {
+	return d.router
+}
+
 func (d *gorillaImpl) Serve(srv *http.Server, listener net.Listener, certFile, keyFile string) (err error) {
 	d.walkRoutes()
 

@@ -32,6 +32,10 @@ func (d *stdImpl) Handler() http.Handler {
 	return d.mux
 }
 
+func (d *stdImpl) App() http.Handler {
+	return d.mux
+}
+
 func (d *stdImpl) Serve(srv *http.Server, listener net.Listener, certFile, keyFile string) (err error) {
 	// NOTE that the h2listener have not been reassigned to the exact tlsListener
 	return srv.ServeTLS(listener, certFile, keyFile)

@@ -37,6 +37,10 @@ func (d *ginImpl) Handler() http.Handler {
 	return d.router
 }
 
+func (d *ginImpl) App() http.Handler {
+	return d.router
+}
+
 func (d *ginImpl) Serve(srv *http.Server, listener net.Listener, certFile, keyFile string) (err error) {
 	// note that the h2listener have not been reassigned to the exact tlsListener
 	return srv.ServeTLS(listener, certFile, keyFile)

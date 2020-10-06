@@ -32,6 +32,10 @@ func (d *revelImpl) Handler() http.Handler {
 	panic("implement me")
 }
 
+func (d *revelImpl) App() http.Handler {
+	panic("implement me")
+}
+
 func (d *revelImpl) Serve(srv *http.Server, listener net.Listener, certFile, keyFile string) (err error) {
 	panic("implement me")
 }
