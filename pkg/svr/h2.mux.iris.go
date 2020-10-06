@@ -1,9 +1,7 @@
 package svr
 
 import (
-	"github.com/betacraft/yaag/yaag"
 	"github.com/hedzr/cmdr"
-	"github.com/hedzr/cmdr-addons/pkg/svr/irisyaag"
 	"github.com/hedzr/cmdr/conf"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/core/host"
@@ -12,7 +10,6 @@ import (
 	"github.com/kataras/iris/v12/middleware/recover"
 	"net"
 	"net/http"
-	"path"
 	"time"
 )
 
@@ -105,14 +102,14 @@ func (d *BaseIrisImpl) PrePreServe() {
 		app.HandleDir(cmdr.GetStringRP(conf.AppName, "server.statics.url"), iris.Dir(cmdr.GetStringRP(conf.AppName, "server.statics.path")))
 	}
 
-	loc := cmdr.GetStringRP(conf.AppName, "server.statics.path")
-	yaag.Init(&yaag.Config{ // <- IMPORTANT, init the middleware.
-		On:       true,
-		DocTitle: cmdr.AppName + " via Iris",
-		DocPath:  path.Join(loc, "apidoc.html"),
-		BaseUrls: map[string]string{"Production": "", "Staging": ""},
-	})
-	app.UseRouter(irisyaag.New()) // <- IMPORTANT, register the middleware.
+	//loc := cmdr.GetStringRP(conf.AppName, "server.statics.path")
+	//yaag.Init(&yaag.Config{ // <- IMPORTANT, init the middleware.
+	//	On:       true,
+	//	DocTitle: cmdr.AppName + " via Iris",
+	//	DocPath:  path.Join(loc, "apidoc.html"),
+	//	BaseUrls: map[string]string{"Production": "", "Staging": ""},
+	//})
+	//app.UseRouter(irisyaag.New()) // <- IMPORTANT, register the middleware.
 }
 
 func (d *BaseIrisImpl) print(endTime time.Time, latency time.Duration, status, ip, method, path string, message interface{}, headerMessage interface{}) {
