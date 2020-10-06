@@ -11,7 +11,7 @@ go 1.14
 // replace github.com/kardianos/service => ../../kardianos/service
 
 require (
-	github.com/betacraft/yaag v1.0.0
+	github.com/Joker/hpp v0.0.0-20180418125244-6893e659854a // indirect
 	github.com/c-bata/go-prompt v0.2.5
 	github.com/gin-gonic/gin v1.6.3
 	github.com/gorilla/mux v1.8.0
