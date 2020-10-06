@@ -19,21 +19,40 @@ import (
 )
 
 // NewDaemon creates an `daemon.Daemon` object
-func NewDaemon() dex.Daemon {
+func NewDaemon(opts ...Opt) dex.Daemon {
 	return NewDaemonWithConfig(&service.Config{
 		Name:        "my-daemon",
 		DisplayName: "My Daemon",
 		Description: "My Daemon/Service here",
-	})
+	}, opts...)
 }
 
-func NewDaemonWithConfig(config *service.Config) dex.Daemon {
+// NewDaemonWithConfig creates an `daemon.Daemon` object
+func NewDaemonWithConfig(config *service.Config, opts ...Opt) dex.Daemon {
 	d := &daemonImpl{
 		// exit:   make(chan struct{}),
 		config: config,
 		Type:   typeIris,
 	}
+
+	for _, opt := range opts {
+		opt(d)
+	}
 	return d
+}
+
+type Opt func(d *daemonImpl)
+
+func WithBackendType(typ muxType) Opt {
+	return func(d *daemonImpl) {
+		d.Type = typ
+	}
+}
+
+func WithRouterImpl(r RouterMux) Opt {
+	return func(d *daemonImpl) {
+		d.routerImpl = r
+	}
 }
 
 type daemonImpl struct {
@@ -47,7 +66,7 @@ type daemonImpl struct {
 	certManager *autocert.Manager
 	Type        muxType
 	mux         *http.ServeMux
-	routerImpl  routerMux
+	routerImpl  RouterMux
 	// router      *gin.Engine
 	// irisApp     *iris.Application
 }
@@ -56,27 +75,27 @@ func (d *daemonImpl) Config() (config *service.Config) {
 	return d.config
 }
 
-func (d *daemonImpl) OnRun(prog *dex.Program, stopCh, doneCh chan struct{}, hotReloadListener net.Listener) (err error) {
+func (d *daemonImpl) OnRun(prg *dex.Program, stopCh, doneCh chan struct{}, hotReloadListener net.Listener) (err error) {
 	serverType := cmdr.GetStringR("server.start.Server-Type")
 
-	prog.Logger.Infof("demo daemon OnRun (Server-Type = %q), pid = %v, ppid = %v", serverType, os.Getpid(), os.Getppid())
+	prg.Logger.Infof("demo daemon OnRun (Server-Type = %q), pid = %v, ppid = %v", serverType, os.Getpid(), os.Getppid())
 
 	if serverType == "h2-server" {
-		err = d.onRunHttp2Server(prog, stopCh, doneCh, hotReloadListener)
+		err = d.onRunHttp2Server(prg, stopCh, doneCh, hotReloadListener)
 		if err == nil {
-			err = d.enterLoop(prog, stopCh, doneCh, hotReloadListener)
+			err = d.enterLoop(prg, stopCh, doneCh, hotReloadListener)
 		}
 		return
 	}
 
-	worker(prog, stopCh, doneCh)
+	worker(prg, stopCh, doneCh)
 	return
 }
 
-func worker(prog *dex.Program, stopCh, doneCh chan struct{}) {
-	fullExec, errx := exec.LookPath("git")
-	if errx != nil {
-		prog.Logger.Errorf("Failed to find executable %q: %v", "git --version", errx)
+func worker(prg *dex.Program, stopCh, doneCh chan struct{}) {
+	fullExec, err := exec.LookPath("git")
+	if err != nil {
+		prg.Logger.Errorf("Failed to find executable %q: %v", "git --version", err)
 	}
 
 	var args []string = []string{"--version"}
@@ -85,7 +104,7 @@ func worker(prog *dex.Program, stopCh, doneCh chan struct{}) {
 	ticker := time.NewTicker(5 * time.Second)
 	defer func() {
 		ticker.Stop()
-		if doneCh != nil && prog.InvokedInDaemon {
+		if doneCh != nil && prg.InvokedInDaemon {
 			doneCh <- struct{}{}
 		}
 	}()
@@ -98,44 +117,44 @@ LOOP:
 			break LOOP
 		case tc := <-ticker.C:
 			cmd := exec.Command(fullExec, args...)
-			cmd.Dir = prog.WorkDirName()
+			cmd.Dir = prg.WorkDirName()
 			cmd.Env = append(os.Environ(), env...)
-			cmd.Stdout, cmd.Stderr = prog.GetLogFileHandlers()
+			cmd.Stdout, cmd.Stderr = prg.GetLogFileHandlers()
 
 			pwd, _ := os.Getwd()
-			prog.Logger.Infof("demo running at %d [dir: %q], inDaemon: %v, tick: %v, OS=%v\n", os.Getpid(), pwd, prog.InvokedInDaemon, tc, runtime.GOOS)
+			prg.Logger.Infof("demo running at %d [dir: %q], inDaemon: %v, tick: %v, OS=%v\n", os.Getpid(), pwd, prg.InvokedInDaemon, tc, runtime.GOOS)
 			_ = cmd.Run()
 			cmd.Wait()
-			if !prog.InvokedInDaemon {
+			if !prg.InvokedInDaemon {
 				return
 			}
 		}
 	}
 }
 
-func (*daemonImpl) OnStop(prog *dex.Program) (err error) {
-	prog.Logger.Infof("demo daemon OnStop")
+func (*daemonImpl) OnStop(prg *dex.Program) (err error) {
+	prg.Logger.Infof("demo daemon OnStop")
 	return
 }
 
-func (*daemonImpl) OnReload(prog *dex.Program) {
-	prog.Logger.Infof("demo daemon OnReload")
+func (*daemonImpl) OnReload(prg *dex.Program) {
+	prg.Logger.Infof("demo daemon OnReload")
 }
 
-func (*daemonImpl) OnStatus(prog *dex.Program, p *os.Process) (err error) {
-	fmt.Printf("%v v%v\n", prog.Command.GetRoot().AppName, prog.Command.GetRoot().Version)
+func (*daemonImpl) OnStatus(prg *dex.Program, p *os.Process) (err error) {
+	fmt.Printf("%v v%v\n", prg.Command.GetRoot().AppName, prg.Command.GetRoot().Version)
 	// fmt.Printf("PID=%v\nLOG=%v\n", cxt.PidFileName, cxt.LogFileName)
 	return
 }
 
-func (*daemonImpl) OnInstall(prog *dex.Program) (err error) {
-	prog.Logger.Infof("demo daemon OnInstall")
+func (*daemonImpl) OnInstall(prg *dex.Program) (err error) {
+	prg.Logger.Infof("demo daemon OnInstall")
 	return
 	// panic("implement me")
 }
 
-func (*daemonImpl) OnUninstall(prog *dex.Program) (err error) {
-	prog.Logger.Infof("demo daemon OnUninstall")
+func (*daemonImpl) OnUninstall(prg *dex.Program) (err error) {
+	prg.Logger.Infof("demo daemon OnUninstall")
 	return
 	// panic("implement me")
 }
