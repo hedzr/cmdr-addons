@@ -76,10 +76,18 @@ func (d *daemonImpl) enableGracefulShutdown(srv *http.Server, stopCh, doneCh cha
 func (d *daemonImpl) shutdown(srv *http.Server) {
 	ctx, cancelFunc := context.WithTimeout(context.TODO(), 8*time.Second)
 	defer cancelFunc()
-	if err := srv.Shutdown(ctx); err != nil {
-		cmdr.Logger.Errorf("Shutdown failed: %v", err)
+	if sd, ok := d.routerImpl.(interface {
+		Shutdown(ctx2 context.Context) error
+	}); ok {
+		if err := sd.Shutdown(ctx); err != nil {
+			cmdr.Logger.Errorf("   mux Shutdown failed: %v", err)
+		} else {
+			cmdr.Logger.Debugf("   mux Shutdown ok.")
+		}
+	} else if err := srv.Shutdown(ctx); err != nil {
+		cmdr.Logger.Errorf("   srv Shutdown failed: %v", err)
 	} else {
-		cmdr.Logger.Debugf("Shutdown ok.")
+		cmdr.Logger.Debugf("   srv Shutdown ok.")
 	}
 }
 
@@ -251,7 +259,7 @@ func (d *daemonImpl) onRunHttp2Server(prg *dex.Program, stopCh, doneCh chan stru
 			// if err = d.serve(srv, hotReloadListener, "ci/certs/server.cert", "ci/certs/server.key"); err != http.ErrServerClosed {
 			// 	cmdr.Logger.Fatal(err)
 			// }
-			cmdr.Logger.Printf("end")
+			cmdr.Logger.Printf("   end")
 			// 		} else {
 			// 			cmdr.Logger.Fatalf(`ci/certs/server.{cert,key} NOT FOUND under '%s'. You might generate its at command line:
 			//
@@ -266,7 +274,7 @@ func (d *daemonImpl) onRunHttp2Server(prg *dex.Program, stopCh, doneCh chan stru
 			if err = d.serve(prg, srv, hotReloadListener, "", ""); err != http.ErrServerClosed && err != nil {
 				cmdr.Logger.Fatalf("%+v", err)
 			}
-			cmdr.Logger.Printf("end")
+			cmdr.Logger.Printf("   end")
 		}
 	}()
 
@@ -312,7 +320,7 @@ func (d *daemonImpl) serve(prg *dex.Program, srv *http.Server, listener net.List
 		if h2listener != nil {
 			h2listener.Close()
 		}
-		cmdr.Logger.Printf("h2listener closed, pid=%v", os.Getpid())
+		cmdr.Logger.Printf("   h2listener closed, pid=%v", os.Getpid())
 	}()
 
 	h2listener = listener

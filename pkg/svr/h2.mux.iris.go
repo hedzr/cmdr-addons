@@ -1,6 +1,7 @@
 package svr
 
 import (
+	"context"
 	"github.com/hedzr/cmdr"
 	"github.com/hedzr/cmdr/conf"
 	"github.com/kataras/iris/v12"
@@ -40,6 +41,10 @@ func (d *BaseIrisImpl) init() {
 	d.irisApp = app
 
 	app.UseRouter(recover.New())
+}
+
+func (d *BaseIrisImpl) Shutdown(ctx context.Context) error {
+	return d.irisApp.Shutdown(ctx)
 }
 
 func (d *BaseIrisImpl) PrePreServe() {
