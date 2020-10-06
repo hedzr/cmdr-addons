@@ -25,7 +25,7 @@ func WithServiceConfig(config *service.Config) Opt {
 	}
 }
 
-// WithLoggerForward forwards all logging outputs to the out and 
+// WithLoggerForward forwards all logging outputs to the out and
 // err files.
 // Typically the files could be found at `/var/log/<appname>/`.
 func WithLoggerForward(force bool) Opt {
@@ -35,7 +35,7 @@ func WithLoggerForward(force bool) Opt {
 }
 
 // WithCommandsModifier could specify a modifier, which allows the tune can
-// be applied onto daemon-server-command. 
+// be applied onto daemon-server-command.
 func WithCommandsModifier(modifier func(daemonServerCommand *cmdr.Command) *cmdr.Command) Opt {
 	return func() {
 		pd.modifier = modifier
