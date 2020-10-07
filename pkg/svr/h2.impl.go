@@ -76,9 +76,7 @@ func (d *daemonImpl) enableGracefulShutdown(srv *http.Server, stopCh, doneCh cha
 func (d *daemonImpl) shutdown(srv *http.Server) {
 	ctx, cancelFunc := context.WithTimeout(context.TODO(), 8*time.Second)
 	defer cancelFunc()
-	if sd, ok := d.routerImpl.(interface {
-		Shutdown(ctx2 context.Context) error
-	}); ok {
+	if sd, ok := d.routerImpl.(GracefulShutdown); ok {
 		if err := sd.Shutdown(ctx); err != nil {
 			cmdr.Logger.Errorf("   mux Shutdown failed: %v", err)
 		} else {
