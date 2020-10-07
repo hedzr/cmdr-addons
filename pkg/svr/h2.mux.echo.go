@@ -1,6 +1,7 @@
 package svr
 
 import (
+	"context"
 	"crypto/tls"
 	"github.com/hedzr/cmdr"
 	"github.com/labstack/echo-contrib/jaegertracing"
@@ -57,6 +58,10 @@ func (d *echoImpl) init() {
 	d.e.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}))
 
 	// d.e.Logger.Fatal(d.e.Start(":1323"))
+}
+
+func (d *echoImpl) Shutdown(ctx context.Context) error {
+	return d.e.Shutdown(ctx)
 }
 
 // // DefaultSkipper returns false which processes the middleware.
