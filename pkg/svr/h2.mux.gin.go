@@ -17,14 +17,6 @@ type ginImpl struct {
 	router *gin.Engine
 }
 
-func (d *ginImpl) PreServe() (err error) {
-	return
-}
-
-func (d *ginImpl) PostServe() (err error) {
-	return
-}
-
 func (d *ginImpl) init() {
 	gin.ForceConsoleColor()
 	d.router = gin.New()
@@ -33,12 +25,25 @@ func (d *ginImpl) init() {
 	// d.router.GET("/benchmark", MyBenchLogger(), benchEndpoint)
 }
 
+//func (d *ginImpl) Shutdown(ctx context.Context) error {
+//	d.router.
+//	return nil
+//}
+
 func (d *ginImpl) Handler() http.Handler {
 	return d.router
 }
 
 func (d *ginImpl) App() http.Handler {
 	return d.router
+}
+
+func (d *ginImpl) PreServe() (err error) {
+	return
+}
+
+func (d *ginImpl) PostServe() (err error) {
+	return
 }
 
 func (d *ginImpl) Serve(srv *http.Server, listener net.Listener, certFile, keyFile string) (err error) {

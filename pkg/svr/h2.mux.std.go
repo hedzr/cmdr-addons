@@ -20,20 +20,20 @@ func (d *stdImpl) init() {
 	d.mux = http.NewServeMux()
 }
 
-func (d *stdImpl) PreServe() (err error) {
-	return
-}
-
-func (d *stdImpl) PostServe() (err error) {
-	return
-}
-
 func (d *stdImpl) Handler() http.Handler {
 	return d.mux
 }
 
 func (d *stdImpl) App() http.Handler {
 	return d.mux
+}
+
+func (d *stdImpl) PreServe() (err error) {
+	return
+}
+
+func (d *stdImpl) PostServe() (err error) {
+	return
 }
 
 func (d *stdImpl) Serve(srv *http.Server, listener net.Listener, certFile, keyFile string) (err error) {

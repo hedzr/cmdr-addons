@@ -21,14 +21,6 @@ type gorillaImpl struct {
 	router *mux.Router
 }
 
-func (d *gorillaImpl) PreServe() (err error) {
-	return
-}
-
-func (d *gorillaImpl) PostServe() (err error) {
-	return
-}
-
 func (d *gorillaImpl) init() {
 	d.router = mux.NewRouter()
 
@@ -39,12 +31,24 @@ func (d *gorillaImpl) init() {
 	// r.Host("{subdomain:[a-z]+}.example.com")
 }
 
+//func (d *gorillaImpl) Shutdown(ctx context.Context) error {
+//	return d.router.Shutdown(ctx)
+//}
+
 func (d *gorillaImpl) Handler() http.Handler {
 	return d.router
 }
 
 func (d *gorillaImpl) App() http.Handler {
 	return d.router
+}
+
+func (d *gorillaImpl) PreServe() (err error) {
+	return
+}
+
+func (d *gorillaImpl) PostServe() (err error) {
+	return
 }
 
 func (d *gorillaImpl) Serve(srv *http.Server, listener net.Listener, certFile, keyFile string) (err error) {
