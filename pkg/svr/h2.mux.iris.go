@@ -163,7 +163,10 @@ func (d *BaseIrisImpl) Serve(srv *http.Server, listener net.Listener, certFile, 
 
 		// v2 - http 2 with iris tls, but h2listener not ready
 		_ = listener.Close()
-		return d.irisApp.Run(d.irisTLSServer(srv), iris.WithoutServerError(iris.ErrServerClosed))
+		return d.irisApp.Run(d.irisTLSServer(srv),
+			// iris.WithoutVersionChecker,
+			//iris.WithOptimizations,
+			iris.WithoutServerError(iris.ErrServerClosed))
 	}
 
 	return d.irisApp.Run(iris.Server(srv), iris.WithoutServerError(iris.ErrServerClosed))
