@@ -15,8 +15,8 @@ require (
 	github.com/c-bata/go-prompt v0.2.5
 	github.com/gin-gonic/gin v1.6.3
 	github.com/gorilla/mux v1.8.0
-	github.com/hedzr/cmdr v1.7.37
-	github.com/hedzr/log v0.3.3
+	github.com/hedzr/cmdr v1.7.38
+	github.com/hedzr/log v0.3.5
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/kardianos/service v1.1.0
 	github.com/kataras/iris/v12 v12.2.0-alpha.0.20200930073625-5017e3c986be
@@ -28,6 +28,6 @@ require (
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/yudai/pp v2.0.1+incompatible // indirect
 	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0
-	gopkg.in/hedzr/errors.v2 v2.1.1
+	gopkg.in/hedzr/errors.v2 v2.1.3
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
