@@ -15,8 +15,8 @@ require (
 	github.com/c-bata/go-prompt v0.2.5
 	github.com/gin-gonic/gin v1.6.3
 	github.com/gorilla/mux v1.8.0
-	github.com/hedzr/cmdr v1.7.40
-	github.com/hedzr/log v0.3.8
+	github.com/hedzr/cmdr v1.7.41
+	github.com/hedzr/log v0.3.9
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/kardianos/service v1.1.0
 	github.com/kataras/iris/v12 v12.2.0-alpha.0.20200930073625-5017e3c986be
