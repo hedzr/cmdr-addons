@@ -5,12 +5,15 @@ import (
 	"github.com/hedzr/cmdr"
 	"github.com/hedzr/cmdr/conf"
 	"github.com/kataras/iris/v12"
+	ic "github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/host"
-	"github.com/kataras/iris/v12/middleware/accesslog"
+	"github.com/kataras/iris/v12/middleware/basicauth"
 	"github.com/kataras/iris/v12/middleware/logger"
 	"github.com/kataras/iris/v12/middleware/recover"
 	"net"
 	"net/http"
+	"os"
+	"path"
 	"time"
 )
 
@@ -33,14 +36,14 @@ func NewRouterBaseIrisImpl() BaseIrisImpl {
 
 type BaseIrisImpl struct {
 	irisApp *iris.Application
-	ac      *accesslog.AccessLog
+	logFile *os.File
 }
 
 func (d *BaseIrisImpl) init() {
 	app := iris.New()
 	d.irisApp = app
 
-	app.UseRouter(recover.New())
+	app.Use(recover.New())
 }
 
 func (d *BaseIrisImpl) Shutdown(ctx context.Context) error {
@@ -90,21 +93,55 @@ func (d *BaseIrisImpl) PrePreServe() {
 
 	app.Use(customLogger)
 	app.Logger().SetLevel(n)
+	app.Logger().SetOutput(d.newLogFile())
 	//app.OnAnyErrorCode(customLogger, func(ctx iris.Context) {
 	//	// this should be added to the logs, at the end because of the `logger.Config#MessageContextKey`
 	//	ctx.Values().Set("logger_message",
 	//		"a dynamic message passed to the logs")
 	//	ctx.Writef("My Custom error page")
 	//})
-
-	// Note, it's buffered, so make sure it's closed so it can flush any buffered contents.
-	d.ac = accesslog.File("./access.log")
-	// defer ac.Close()
-	app.UseRouter(d.ac.Handler)
+	//
+	//// Note, it's buffered, so make sure it's closed so it can flush any buffered contents.
+	//d.logFile = accesslog.File("./access.log")
+	//// defer logFile.Close()
+	//app.UseRouter(d.logFile.Handler)
 
 	if cmdr.GetBoolRP(conf.AppName, "server.statics.enabled") {
 		// Serve our front-end and its assets.
-		app.HandleDir(cmdr.GetStringRP(conf.AppName, "server.statics.url"), iris.Dir(cmdr.GetStringRP(conf.AppName, "server.statics.path")))
+		// app.HandleDir(cmdr.GetStringRP(conf.AppName, "server.statics.url"), iris.Dir(cmdr.GetStringRP(conf.AppName, "server.statics.path")))
+
+		ctxUrl := cmdr.GetStringRP(conf.AppName, "server.statics.url")
+		localPath := cmdr.GetStringRP(conf.AppName, "server.statics.path")
+		filesRouter := app.Party(ctxUrl)
+		{
+			filesRouter.HandleDir("/", localPath, iris.DirOptions{
+				IndexName: "/index.html",
+				Gzip:      true,
+				ShowList:  true,
+
+				//// Optionally, force-send files to the client inside of showing to the browser.
+				//Attachments: iris.Attachments{
+				//	Enable: true,
+				//	// Optionally, control data sent per second:
+				//	Limit: 50.0 * iris.KB,
+				//	Burst: 100 * iris.KB,
+				//	// Change the destination name through:
+				//	// NameFunc: func(systemName string) string {...}
+				//},
+				//
+				//DirList: iris.DirListRich(iris.DirListRichOptions{
+				//	// Optionally, use a custom template for listing:
+				//	// Tmpl: dirListRichTemplate,
+				//	TmplName: "dirlist.html",
+				//}),
+			})
+
+			auth := basicauth.Default(map[string]string{
+				"myusername": "mypassword",
+			})
+
+			filesRouter.Delete("/{file:path}", auth, deleteFile)
+		}
 	}
 
 	//loc := cmdr.GetStringRP(conf.AppName, "server.statics.path")
@@ -115,6 +152,41 @@ func (d *BaseIrisImpl) PrePreServe() {
 	//	BaseUrls: map[string]string{"Production": "", "Staging": ""},
 	//})
 	//app.UseRouter(irisyaag.New()) // <- IMPORTANT, register the middleware.
+}
+
+func deleteFile(ctx ic.Context) {
+	// It does not contain the system path,
+	// as we are not exposing it to the user.
+	fileName := ctx.Params().Get("file")
+	localPath := cmdr.GetStringRP(conf.AppName, "server.statics.path")
+	filePath := path.Join(localPath, fileName)
+
+	if err := os.RemoveAll(filePath); err != nil {
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.StopExecution()
+		ctx.Application().Logger().Errorf("error in removing file: %v", err)
+		return
+	}
+
+	ctx.Redirect("/files")
+}
+
+// Get a filename based on the date, just for the sugar.
+func todayFilename() string {
+	today := time.Now().Format("Jan 02 2006")
+	return today + ".txt"
+}
+
+func (d *BaseIrisImpl) newLogFile() *os.File {
+	filename := todayFilename()
+	// Open the file, this will append to the today's file if server restarted.
+	f, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	d.logFile = f
+	return f
 }
 
 func (d *BaseIrisImpl) print(endTime time.Time, latency time.Duration, status, ip, method, path string, message interface{}, headerMessage interface{}) {
@@ -187,11 +259,11 @@ func (d *BaseIrisImpl) Serve(srv *http.Server, listener net.Listener, certFile, 
 
 func (d *BaseIrisImpl) irisTLSServer(srv *http.Server, hostConfigs ...host.Configurator) iris.Runner {
 	return func(app *iris.Application) error {
-		host := app.NewHost(srv)
-		host.RegisterOnShutdown(func() {
-			d.ac.Close()
+		host1 := app.NewHost(srv)
+		host1.RegisterOnShutdown(func() {
+			_ = d.logFile.Close()
 		})
-		return host.Configure(hostConfigs...).
+		return host1.Configure(hostConfigs...).
 			ListenAndServeTLS("", "")
 	}
 }
@@ -219,6 +291,21 @@ func (d *irisImpl) BuildRoutes() {
 	// app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
 
 	d.irisApp.Get("/s/:path", d.echoIrisHandler)
+
+	d.irisApp.Get("/ping", func(ctx iris.Context) {
+		// for the sake of simplicity, in order see the logs at the ./_today_.txt
+		ctx.Application().Logger().Infof("Request path: %s", ctx.Path())
+		_, _ = ctx.WriteString("pong")
+	})
+
+	var i int
+	d.irisApp.Get("/panic", func(ctx iris.Context) {
+		i++
+		if i%2 == 0 {
+			panic("a panic here")
+		}
+		_, _ = ctx.Writef("Hello, refresh one time more to get panic!")
+	})
 
 	//
 	// d.irisApp.Get("/users/{id:uint64}", func(ctx iris.Context){
