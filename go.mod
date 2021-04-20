@@ -20,7 +20,7 @@ require (
 	github.com/hedzr/cmdr v1.8.0
 	github.com/hedzr/log v0.3.13
 	github.com/imkira/go-interpol v1.1.0 // indirect
-	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b8 // indirect
+	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/kardianos/service v1.2.0
 	github.com/kataras/iris/v12 v12.1.8
 	github.com/labstack/echo-contrib v0.9.0
