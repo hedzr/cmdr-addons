@@ -34,7 +34,11 @@ jobs:
         run: go build -v ./...
 
       - name: Test
-        run: go test -v -coverprofile=profile.cov ./...
+        run: |
+          for GOOS in $(go tool dist list|awk -F'/' '{print $1}'|sort -u); do
+            echo -e "\n\nTESTING FOR $GOOS ...\n"
+            go test -v -race -coverprofile=profile.cov ./...
+          done
 
       - name: Send coverage
         uses: shogo82148/actions-goveralls@v1
