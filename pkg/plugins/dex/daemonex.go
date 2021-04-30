@@ -310,7 +310,7 @@ func daemonStop(cmd *cmdr.Command, args []string) (err error) {
 	pd.Command, pd.Args = cmd, args
 	err = service.Control(pd.Service, "stop")
 	if err != nil {
-		pd.Logger.Errorf("Valid actions %q: %v\n", service.ControlAction, err)
+		pd.Logger.Errorf("Valid actions are %q, cannot 'stop' the service: %v\n", service.ControlAction, err)
 		// return // log.Fatal(err)
 	}
 
