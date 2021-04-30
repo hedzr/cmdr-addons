@@ -2,6 +2,7 @@ package svr
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/hedzr/cmdr-addons/pkg/svr/tls"
 	"io"
 	"net"
 	"net/http"
@@ -20,8 +21,7 @@ type ginImpl struct {
 func (d *ginImpl) init() {
 	gin.ForceConsoleColor()
 	d.router = gin.New()
-	d.router.Use(gin.Logger())
-	d.router.Use(gin.Recovery())
+	d.router.Use(gin.Logger(), gin.Recovery())
 	// d.router.GET("/benchmark", MyBenchLogger(), benchEndpoint)
 }
 
@@ -66,6 +66,17 @@ func (d *ginImpl) BuildRoutes() {
 	d.router.GET("/hello", helloGinHandler)
 
 	d.router.GET("/s/*action", echoGinHandler)
+}
+
+func (d *ginImpl) Run(config *tls.CmdrTLSConfig, srv *http.Server, hotReloadListener net.Listener) (err error) {
+	if config.IsServerCertValid() || srv.TLSConfig.GetCertificate == nil {
+		err = d.router.RunTLS(srv.Addr, config.Cert, config.Key)
+	} else if hotReloadListener != nil {
+		err = d.router.RunListener(hotReloadListener)
+	} else {
+		err = d.router.Run(srv.Addr)
+	}
+	return
 }
 
 // func (d *daemonImpl) buildGinRoutes(mux *gin.Engine) (err error) {
