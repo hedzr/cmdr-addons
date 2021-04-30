@@ -2,6 +2,7 @@ package svr
 
 import (
 	"context"
+	"github.com/hedzr/cmdr-addons/pkg/svr/tls"
 	"net"
 	"net/http"
 )
@@ -26,4 +27,9 @@ type GracefulShutdown interface {
 // ForLoggerInitializing can be used for your logger initializing inside a router, such as iris.Use(logger.New()).
 type ForLoggerInitializing interface {
 	PrePreServe()
+}
+
+// SpecialRun provides the ability how a RouterMux object listen-and-serv to ...
+type SpecialRun interface {
+	Run(config *tls.CmdrTLSConfig, srv *http.Server, hotReloadListener net.Listener) (err error)
 }

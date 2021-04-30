@@ -133,7 +133,7 @@ func (d *daemonImpl) onRunHttp2Server(prg *dex.Program, stopCh, doneCh chan stru
 		conf.ServerID = d.appTag
 	}
 
-	cmdr.Logger.Debugf("%q daemon OnRun, pid = %v, ppid = %v", d.appTag, os.Getpid(), os.Getppid())
+	cmdr.Logger.Debugf("[%s] daemon OnRun, pid = %v, ppid = %v", d.appTag, os.Getpid(), os.Getppid())
 
 	// Tweak configuration values here.
 	var (
@@ -205,6 +205,15 @@ func (d *daemonImpl) onRunHttp2Server(prg *dex.Program, stopCh, doneCh chan stru
 		WriteTimeout:      writeTimeout,
 		IdleTimeout:       idleTimeout,
 		MaxHeaderBytes:    maxHeaderBytes,
+	}
+
+	if dx, ok := d.routerImpl.(SpecialRun); ok {
+		go func() {
+			if err := dx.Run(config, srv, hotReloadListener); err != nil {
+				cmdr.Logger.Fatalf("%+v", err)
+			}
+		}()
+		return
 	}
 
 	d.enableGracefulShutdown(srv, stopCh, doneCh)
