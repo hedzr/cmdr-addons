@@ -32,7 +32,7 @@ func NewDaemonWithConfig(config *service.Config, opts ...Opt) dex.Daemon {
 	d := &daemonImpl{
 		// exit:   make(chan struct{}),
 		config: config,
-		Type:   typeIris,
+		Type:   typeGin,
 	}
 
 	for _, opt := range opts {
@@ -72,7 +72,14 @@ type daemonImpl struct {
 }
 
 func (d *daemonImpl) Config() (config *service.Config) {
+	if dio, ok := d.routerImpl.(interface{ Config() *service.Config }); ok {
+		d.config = dio.Config()
+	}
 	return d.config
+}
+
+func (d *daemonImpl) RouterMux() RouterMux {
+	return d.routerImpl
 }
 
 func (d *daemonImpl) OnRun(prg *dex.Program, stopCh, doneCh chan struct{}, hotReloadListener net.Listener) (err error) {

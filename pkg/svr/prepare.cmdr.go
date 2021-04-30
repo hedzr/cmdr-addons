@@ -86,12 +86,12 @@ func (d *daemonImpl) OnCmdrPrepare(prog *dex.Program, root *cmdr.RootCommand) (e
 	// 	Group("Tool").
 	// 	Action(tls.CaCreate)
 
-	cmdr.NewBool(true).
+	cmdr.NewBool(false).
 		Titles("iris", "iris").
 		Description("use Iris engine", "").
 		ToggleGroup("Mux").
 		AttachTo(opt)
-	cmdr.NewBool(false).
+	cmdr.NewBool(true).
 		Titles("gin", "gin").
 		Description("use Gin engine", "").
 		ToggleGroup("Mux").
