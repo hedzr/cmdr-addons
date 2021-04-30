@@ -94,7 +94,7 @@ $ {{.AppName}} uninstall
 				BaseOpt: cmdr.BaseOpt{
 					Short:       "t",
 					Full:        "stop",
-					Aliases:     []string{"halt", "pause"},
+					Aliases:     []string{"halt", "pause", "shutdown"},
 					Description: "stop this system service/daemon.",
 					Action:      daemonStop,
 				},
@@ -193,6 +193,7 @@ With this action, the service will keep serving without broken.
 							Description: "install as a systemd service.",
 						},
 						DefaultValue: true,
+						ToggleGroup:  "service-type",
 					},
 				},
 			},
@@ -204,6 +205,18 @@ With this action, the service will keep serving without broken.
 					Description: "remove from a system service/daemon.",
 					Group:       "Config",
 					Action:      daemonUninstall,
+				},
+				Flags: []*cmdr.Flag{
+					{
+						BaseOpt: cmdr.BaseOpt{
+							Short:       "s",
+							Full:        "systemd",
+							Aliases:     []string{"sys"},
+							Description: "uninstall the systemd service.",
+						},
+						DefaultValue: true,
+						ToggleGroup:  "service-type",
+					},
 				},
 			},
 		},
