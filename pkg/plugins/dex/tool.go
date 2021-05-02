@@ -7,11 +7,9 @@ package dex
 import (
 	"bytes"
 	"github.com/hedzr/cmdr-addons/pkg/plugins/dex/sig"
-	"gopkg.in/hedzr/errors.v2"
 	"net"
 	"os"
 	"os/exec"
-	"syscall"
 	"text/template"
 )
 
@@ -22,16 +20,6 @@ func tplApply(tmpl string, data interface{}) string {
 		pd.log.Errorf("tpl execute error: %v", err)
 	}
 	return w.String()
-}
-
-// IsErrorAddressAlreadyInUse tests if "bind: address already in use" found
-func IsErrorAddressAlreadyInUse(err error) bool {
-	if e, ok := errors.Unwrap(err).(*os.SyscallError); ok {
-		if errno, ok := e.Err.(syscall.Errno); ok {
-			return errno == syscall.EADDRINUSE
-		}
-	}
-	return false
 }
 
 func isRootUser() bool {
