@@ -146,11 +146,13 @@ func attachPreAction(root *cmdr.RootCommand, preActions ...func(cmd *cmdr.Comman
 
 const systemdScript = `[Unit]
 Description={{.Description}}
+# Documentation=man:sshd(8) man:sshd_config(5) man:{{.Name}}(1)
 ConditionFileIsExecutable={{.Path|cmdEscape}}
 {{range $i, $dep := .Dependencies}} 
 {{$dep}} {{end}}
 
 [Service]
+LimitNOFILE=65535
 StartLimitInterval=5
 StartLimitBurst=10
 ExecStart={{.Path|cmdEscape}}{{range .Arguments}} {{.|cmd}}{{end}}
@@ -158,7 +160,8 @@ ExecStart={{.Path|cmdEscape}}{{range .Arguments}} {{.|cmd}}{{end}}
 {{if .WorkingDirectory}}WorkingDirectory={{.WorkingDirectory|cmdEscape}}{{end}}
 {{if .UserName}}User={{.UserName}}{{end}}
 {{if .ReloadSignal}}ExecReload=/bin/kill -{{.ReloadSignal}} "$MAINPID"{{end}}
-{{if .PIDFile}}PIDFile={{.PIDFile|cmd}}{{end}}
+{{if .PIDFile}}#PIDFile={{.PIDFile|cmd}}{{end}}
+{{if .PIDFile}}PIDFile={{.PIDFile}}{{end}}
 {{if and .LogOutput .HasOutputFileSupport -}}
 StandardOutput=file:/var/log/{{.Name}}/{{.Name}}.out
 StandardError=file:/var/log/{{.Name}}/{{.Name}}.err
@@ -166,7 +169,7 @@ StandardError=file:/var/log/{{.Name}}/{{.Name}}.err
 {{if .Restart}}Restart={{.Restart}}{{end}}
 {{if .SuccessExitStatus}}SuccessExitStatus={{.SuccessExitStatus}}{{end}}
 RestartSec=120
-EnvironmentFile=-{{.EnvFileName}}
+EnvironmentFile=-{{.Config.Option.envFileName}}
 
 [Install]
 WantedBy=multi-user.target
@@ -219,7 +222,7 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 			}
 		}
 
-		pd.Config.Option["envFilename"] = pd.EnvFileName()
+		pd.Config.Option["envFileName"] = pd.EnvFileName()
 
 		pd.Config.Option["SystemdScript"] = systemdScript
 	}
@@ -250,7 +253,8 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 		}
 	}()
 
-	pd.Logger.Info("daemonex prepared.")
+	// pd.Logger.Info("daemonex prepared.")
+	log.Trace("daemonex prepared.")
 	return
 }
 
