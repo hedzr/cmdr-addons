@@ -63,9 +63,10 @@ func (d *daemonImpl) enableGracefulShutdown(srv *http.Server, stopCh, doneCh cha
 		for {
 			select {
 			case <-stopCh:
-				cmdr.Logger.Debugf("...shutdown going on.")
+				cmdr.Logger.Debugf("... shutdown going on.")
 				d.shutdown(srv)
 				<-doneCh
+				cmdr.Logger.Debugf("... gracefulShutdown routine end.")
 				return
 			}
 		}
@@ -105,6 +106,7 @@ func (d *daemonImpl) enterLoop(prg *dex.Program, stopCh, doneCh chan struct{}, l
 
 	default:
 		cmdr.Logger.Printf("daemon.dex ServeSignals, pid = %v", os.Getpid())
+		fmt.Printf("daemon.dex ServeSignals, pid = %v\n", os.Getpid())
 		if err = sig.ServeSignals(); err != nil {
 			cmdr.Logger.Errorf("daemon.dex Error: %v", err)
 		}
@@ -115,9 +117,9 @@ func (d *daemonImpl) enterLoop(prg *dex.Program, stopCh, doneCh chan struct{}, l
 	// }
 
 	if err != nil {
-		cmdr.Logger.Fatalf("daemon.dex terminated: %v", err)
+		cmdr.Logger.Fatalf("svr.enterLoop: (daemon.dex) terminated: %v", err)
 	}
-	cmdr.Logger.Printf("daemon.dex terminated.")
+	cmdr.Logger.Printf("svr.enterLoop: (daemon.dex) terminated.")
 
 	return
 }
@@ -266,7 +268,7 @@ func (d *daemonImpl) onRunHttp2Server(prg *dex.Program, stopCh, doneCh chan stru
 			// if err = d.serve(srv, hotReloadListener, "ci/certs/server.cert", "ci/certs/server.key"); err != http.ErrServerClosed {
 			// 	cmdr.Logger.Fatal(err)
 			// }
-			cmdr.Logger.Printf("   end")
+			cmdr.Logger.Printf("   routine in onRunHttp2Server: end (HTTPS mode)")
 			// 		} else {
 			// 			cmdr.Logger.Fatalf(`ci/certs/server.{cert,key} NOT FOUND under '%s'. You might generate its at command line:
 			//
@@ -281,7 +283,7 @@ func (d *daemonImpl) onRunHttp2Server(prg *dex.Program, stopCh, doneCh chan stru
 			if err = d.serve(prg, srv, hotReloadListener, "", ""); err != http.ErrServerClosed && err != nil {
 				cmdr.Logger.Fatalf("%+v", err)
 			}
-			cmdr.Logger.Printf("   end")
+			cmdr.Logger.Printf("   routine in onRunHttp2Server: end (HTTP mode)")
 		}
 	}()
 
