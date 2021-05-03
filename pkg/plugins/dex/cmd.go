@@ -195,6 +195,24 @@ With this action, the service will keep serving without broken.
 						DefaultValue: true,
 						ToggleGroup:  "service-type",
 					},
+					{
+						BaseOpt: cmdr.BaseOpt{
+							Short:       "u",
+							Full:        "user",
+							Aliases:     []string{"username"},
+							Description: "service will run under this user.",
+						},
+						DefaultValue: "",
+					},
+					{
+						BaseOpt: cmdr.BaseOpt{
+							Short:       "g",
+							Full:        "group",
+							Aliases:     []string{"groupname"},
+							Description: "service will run under this group.",
+						},
+						DefaultValue: "",
+					},
 				},
 			},
 			{

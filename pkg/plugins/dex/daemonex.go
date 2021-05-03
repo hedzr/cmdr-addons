@@ -155,17 +155,27 @@ ConditionFileIsExecutable={{.Path|cmdEscape}}
 LimitNOFILE=65535
 StartLimitInterval=5
 StartLimitBurst=10
-ExecStart={{.Path|cmdEscape}}{{range .Arguments}} {{.|cmd}}{{end}}
+ExecStart={{.Path|cmdEscape}} $GLOBAL_OPTIONS {{range .Arguments}} {{.|cmd}}{{end}}
+{{if .Config.Option.stopArgs}}ExecStop={{.Path|cmdEscape}} $GLOBAL_OPTIONS {{.Config.Option.stopArgs}}{{end}}
+{{if .Config.Option.reloadArgs}}ExecReload={{.Path|cmdEscape}} $GLOBAL_OPTIONS {{.Config.Option.reloadArgs}}{{end}}
+#ExecReload=/bin/kill -HUP $MAINPID
 {{if .ChRoot}}RootDirectory={{.ChRoot|cmd}}{{end}}
 {{if .WorkingDirectory}}WorkingDirectory={{.WorkingDirectory|cmdEscape}}{{end}}
 {{if .UserName}}User={{.UserName}}{{end}}
+{{if .Config.Option.GroupName}}Group={{.Config.Option.GroupName}}{{end}}
 {{if .ReloadSignal}}ExecReload=/bin/kill -{{.ReloadSignal}} "$MAINPID"{{end}}
 {{if .PIDFile}}#PIDFile={{.PIDFile|cmd}}{{end}}
 {{if .PIDFile}}PIDFile={{.PIDFile}}{{end}}
 {{if and .LogOutput .HasOutputFileSupport -}}
-StandardOutput=file:/var/log/{{.Name}}/{{.Name}}.out
-StandardError=file:/var/log/{{.Name}}/{{.Name}}.err
+# Works only in systemd v240 and newer! And, it can't work in most cases.
+StandardOutput=append:/var/log/{{.Name}}/{{.Name}}.out
+StandardError=append:/var/log/{{.Name}}/{{.Name}}.err
 {{- end}}
+{{if .LogOutput -}}{{if not .HasOutputFileSupport -}}
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier={{.AppName}}
+{{- end}}{{- end}}
 {{if .Restart}}Restart={{.Restart}}{{end}}
 {{if .SuccessExitStatus}}SuccessExitStatus={{.SuccessExitStatus}}{{end}}
 RestartSec=120
@@ -227,6 +237,9 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 		pd.Config.Option["SystemdScript"] = systemdScript
 	}
 
+	// pd.Config.Option["stopArgs"] = "server stop -3"
+	// pd.Config.Option["reloadArgs"] = "server reload"
+
 	pd.Service, err = service.New(pd, pd.Config)
 	if err != nil {
 		return
@@ -236,6 +249,16 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 	pd.Logger, err = pd.Service.Logger(errs)
 	if err != nil {
 		return
+	}
+
+	if cmdr.GetBoolRP("server.start", "in-daemon") {
+		sl := log.FromSystemdLogger(pd.Logger)
+		log.SetLogger(sl)
+		cmdr.SetLogger(sl)
+		pd.Logger.Infof("daemonStart: log-level: %v", cmdr.GetLoggerLevel())
+		sl.SetLevel(log.DebugLevel)
+		log.Debugf("hello")
+		cmdr.Logger.Debugf("hello [cmdr]")
 	}
 
 	// pd.daemon.OnReadConfigFromCommandLine(root)
@@ -265,6 +288,8 @@ func daemonStart(cmd *cmdr.Command, args []string) (err error) {
 	foreground := cmdr.GetBoolRP("server.start", "foreground")
 	pd.Logger.Infof("daemonStart: foreground: %v, in-daemon: %v, hot-reload: %v, hit: %v", foreground, pd.InvokedInDaemon, hotReloading, cmd.GetHitStr())
 
+	cmdr.Set("in-daemon", pd.InvokedInDaemon)
+
 	// ctx := impl.GetContext(Command, Args, daemonImpl, onHotReloading)
 	if hotReloading {
 		err = daemonHotReload(cmd, args)
@@ -277,8 +302,12 @@ func daemonStart(cmd *cmdr.Command, args []string) (err error) {
 	} else {
 		err = runAsDaemon(cmd, args)
 	}
-	pd.Logger.Infof("daemonStart END: err: %v", err)
-	if pd.InvokedInDaemon || runtime.GOOS == "windows" {
+
+	pd.Logger.Info("daemonStart END.")
+	if err != nil {
+		pd.Logger.Errorf("  >> with error: %v", err)
+	}
+	if pd.InvokedInDaemon && runtime.GOOS == "windows" {
 		err = pd.Service.Run()
 	}
 	return
@@ -418,6 +447,8 @@ func daemonStatus(cmd *cmdr.Command, args []string) (err error) {
 
 func daemonInstall(cmd *cmdr.Command, args []string) (err error) {
 	pd.Command, pd.Args = cmd, args
+	pd.Config.UserName = cmdr.GetStringRP(cmd.GetDottedNamePath(), "user")
+	pd.Config.Option["GroupName"] = cmdr.GetStringRP(cmd.GetDottedNamePath(), "group")
 	err = service.Control(pd.Service, "install")
 	if err != nil {
 		pd.Logger.Errorf("Valid actions %q: %v\n", service.ControlAction, err)

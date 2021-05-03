@@ -77,6 +77,25 @@ sudo systemctl start|stop|restart your-service.service
 sudo systemctl enable|disable your-service.service
 ```
 
+Or start/stop/restart the service with its binary executable:
+
+```bash
+sudo /path/to/app server start|stop|restart
+```
+
+### run from console
+
+You can run the service at console mode:
+
+```bash
+/path/to/app server run
+# Or: /path/to/app server start -f
+```
+
+
+
+
+
 ## dependencies
 
 `dex` wraps ["github.com/kardianos/service"](https://github.com/kardianos/service) to [`cmdr`](https://github/com/hedzr/cmdr) system.

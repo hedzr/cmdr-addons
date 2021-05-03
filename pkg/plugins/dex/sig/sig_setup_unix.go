@@ -53,7 +53,7 @@ func setupSignals() {
 }
 
 func termHandler(sig os.Signal) error {
-	log.Println("terminating...")
+	log.Printf("terminating (caught sig is %v)...", sig)
 	stop <- struct{}{}
 	log.Println("  - send stop ch")
 	if sig == syscall.SIGQUIT {
