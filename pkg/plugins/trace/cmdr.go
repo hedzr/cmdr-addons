@@ -7,7 +7,7 @@ import (
 	"github.com/hedzr/log/trace"
 )
 
-// WithTraceEnable enables a minimal `trace` option at cmdr Root Command Level.
+// WithTraceEnable enables a minimal `--trace` option at cmdr Root Command Level.
 func WithTraceEnable(enabled bool) cmdr.ExecOption {
 	return func(w *cmdr.ExecWorker) {
 		// daemonImpl = daemonImplX
