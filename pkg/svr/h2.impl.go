@@ -39,19 +39,20 @@ func (d *daemonImpl) checkAndEnableAutoCert(config *tls2.CmdrTLSConfig) (tlsConf
 		tlsConfig = config.ToServerTLSConfig()
 	}
 
-	if cmdr.GetBoolR("server.autocert.enabled") {
-		cmdr.Logger.Debugf("...autocert enabled")
-		d.certManager = &autocert.Manager{
-			Prompt:     autocert.AcceptTOS,
-			HostPolicy: autocert.HostWhitelist(d.domains()...), // 测试时使用的域名：example.com
-			Cache:      autocert.DirCache(cmdr.GetStringR("server.autocert.dir-cache", "ci/certs")),
-		}
-		go func() {
-			if err := http.ListenAndServe(":80", d.certManager.HTTPHandler(nil)); err != nil {
-				cmdr.Logger.Fatalf("autocert tool listening on :80 failed: %v", err)
+		if cmdr.GetBoolR("server.auto-cert.enabled") {
+			cmdr.Logger.Debugf("...auto-cert enabled")
+			d.certManager = &autocert.Manager{
+				Prompt:     autocert.AcceptTOS,
+				HostPolicy: autocert.HostWhitelist(d.domains()...), // 测试时使用的域名：example.com
+				Cache:      autocert.DirCache(cmdr.GetStringR("server.auto-cert.dir-cache", "ci/certs")),
 			}
-		}()
-		tlsConfig.GetCertificate = d.certManager.GetCertificate
+			go func() {
+				if err := http.ListenAndServe(":80", d.certManager.HTTPHandler(nil)); err != nil {
+					cmdr.Logger.Fatalf("auto-cert tool listening on :80 failed: %v", err)
+				}
+			}()
+			tlsConfig.GetCertificate = d.certManager.GetCertificate
+		}
 	}
 
 	return
