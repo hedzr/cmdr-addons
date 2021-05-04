@@ -56,9 +56,11 @@ func (d *gorillaImpl) Serve(srv *http.Server, listener net.Listener, certFile, k
 
 	http.Handle("/", d.router)
 
-	// NOTE that the h2listener have not been reassigned to the exact tlsListener
-	return srv.ServeTLS(listener, certFile, keyFile)
-	// return
+	if certFile != "" && keyFile != "" {
+		// NOTE that the h2listener have not been reassigned to the exact tlsListener
+		return srv.ServeTLS(listener, certFile, keyFile)
+	}
+	return srv.Serve(listener)
 }
 
 func (d *gorillaImpl) walkRoutes() {

@@ -69,7 +69,7 @@ func (d *ginImpl) BuildRoutes() {
 }
 
 func (d *ginImpl) Run(config *tls.CmdrTLSConfig, srv *http.Server, hotReloadListener net.Listener) (err error) {
-	if config.IsServerCertValid() || srv.TLSConfig.GetCertificate == nil {
+	if config.Enabled && (config.IsServerCertValid() || srv.TLSConfig.GetCertificate == nil) {
 		err = d.router.RunTLS(srv.Addr, config.Cert, config.Key)
 	} else if hotReloadListener != nil {
 		err = d.router.RunListener(hotReloadListener)

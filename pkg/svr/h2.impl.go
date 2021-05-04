@@ -35,9 +35,10 @@ func (d *daemonImpl) domains() (domainList []string) {
 func (d *daemonImpl) checkAndEnableAutoCert(config *tls2.CmdrTLSConfig) (tlsConfig *tls.Config) {
 	tlsConfig = &tls.Config{}
 
-	if config.IsServerCertValid() {
-		tlsConfig = config.ToServerTLSConfig()
-	}
+	if config.Enabled {
+		if config.IsServerCertValid() {
+			tlsConfig = config.ToServerTLSConfig()
+		}
 
 		if cmdr.GetBoolR("server.auto-cert.enabled") {
 			cmdr.Logger.Debugf("...auto-cert enabled")
@@ -149,10 +150,12 @@ func (d *daemonImpl) onRunHttp2Server(prg *dex.Program, stopCh, doneCh chan stru
 	cmdr.Logger.Tracef("used config file: %v", cmdr.GetUsedConfigFile())
 	cmdr.Logger.Tracef("logger level: %v", cmdr.GetLoggerLevel())
 
-	if config.IsServerCertValid() || tlsConfig.GetCertificate == nil {
-		port = cmdr.GetIntRP(d.appTag, "server.ports.tls")
-	}
 	portNoTls = cmdr.GetIntRP(d.appTag, "server.ports.default", 0)
+	if config.Enabled && (config.IsServerCertValid() || tlsConfig.GetCertificate == nil) {
+		port = cmdr.GetIntRP(d.appTag, "server.ports.tls")
+	} else {
+		port = portNoTls
+	}
 
 	if port == 0 {
 		cmdr.Logger.Fatalf("port not defined.")
@@ -243,7 +246,7 @@ func (d *daemonImpl) onRunHttp2Server(prg *dex.Program, stopCh, doneCh chan stru
 		// Start the server with TLS, since we are running HTTP/2 it must be
 		// run with TLS.
 		// Exactly how you would run an HTTP/1.1 server with TLS connection.
-		if config.IsServerCertValid() || srv.TLSConfig.GetCertificate == nil {
+		if config.Enabled && (config.IsServerCertValid() || srv.TLSConfig.GetCertificate == nil) {
 			cmdr.Logger.Printf("> Serving on %v with HTTPS...", addr)
 			if d.Type == typeIris && portNoTls > 0 {
 				// 转发 80 到 https
