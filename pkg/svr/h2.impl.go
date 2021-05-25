@@ -19,6 +19,7 @@ import (
 	"net/url"
 	"os"
 	"runtime"
+	"strconv"
 	"time"
 )
 
@@ -126,6 +127,86 @@ func (d *daemonImpl) enterLoop(prg *dex.Program, stopCh, doneCh chan struct{}, l
 	return
 }
 
+// LHIMakeDecisionToPort try getting the port number from configurations and environments
+func LHIMakeDecisionToPort(intPort int, tls bool) (fAddr, sPort string) {
+	fAddr = cmdr.GetStringRP(conf.AppName, "server.rpc_address")
+	// if intPort <= 0 || intPort > 65535 {
+	port := cmdr.GetIntRP(conf.AppName, "server.port")
+	// tls := cmdr.GetBoolRP(conf.AppName, "server.tls.enabled")
+	if port <= 0 || port > 65535 {
+		if tls {
+			port = cmdr.GetIntRP(conf.AppName, "server.ports.tls", intPort)
+		} else {
+			port = cmdr.GetIntRP(conf.AppName, "server.ports.default", intPort)
+		}
+	}
+
+	// if port <= 0 || port > 65535 {
+	//if tls {
+	//	sPort = os.Getenv("KUBERNETES_SERVICE_PORT_HTTPS")
+	//} else {
+	//	sPort = os.Getenv("KUBERNETES_SERVICE_PORT")
+	//}
+	if sPort == "" {
+		sPort = os.Getenv("PORT")
+	}
+
+	if sPort != "" {
+		if iPort, err2 := strconv.Atoi(sPort); err2 == nil {
+			port = iPort
+		}
+	}
+	// }
+
+	sPort = strconv.Itoa(port)
+	//} else {
+	//	sPort = strconv.Itoa(intPort)
+	//}
+	return
+}
+
+func (d *daemonImpl) checkServerType() (serverType string) {
+	serverType = cmdr.GetStringRP(d.appTag, "server.type", "")
+	serverType = cmdr.GetStringR("server.Mux", serverType)
+	switch serverType {
+	case "iris":
+		d.Type = typeIris
+	case "echo":
+		d.Type = typeEcho
+	case "gin":
+		d.Type = typeGin
+	case "gorilla":
+		d.Type = typeGorilla
+	case "default":
+		d.Type = typeDefault
+	default:
+		d.Type = typeGin
+	}
+	return
+}
+
+func (d *daemonImpl) createRouterImpl(serverType string) {
+	if d.routerImpl == nil {
+		switch d.Type {
+		case typeIris:
+			d.routerImpl = newIris()
+		case typeEcho:
+			d.routerImpl = newEcho()
+		case typeGin:
+			d.routerImpl = newGin()
+		case typeGorilla:
+			d.routerImpl = newGorilla()
+		case typeDefault:
+			d.routerImpl = newStdMux()
+		default:
+			d.routerImpl = newGin()
+		}
+		cmdr.Logger.Printf("serverType got: %v, %v", serverType, d.Type)
+	} else {
+		cmdr.Logger.Printf("serverType is: %v, %v | routerImpl was preset.", serverType, d.Type)
+	}
+}
+
 // onRunHttp2Server NOTE
 // listener: a copy from parent linux process, just for live reload.
 func (d *daemonImpl) onRunHttp2Server(prg *dex.Program, stopCh, doneCh chan struct{}, hotReloadListener net.Listener) (err error) {
@@ -150,55 +231,27 @@ func (d *daemonImpl) onRunHttp2Server(prg *dex.Program, stopCh, doneCh chan stru
 	cmdr.Logger.Tracef("used config file: %v", cmdr.GetUsedConfigFile())
 	cmdr.Logger.Tracef("logger level: %v", cmdr.GetLoggerLevel())
 
+	isTLS := cmdr.GetBoolRP(conf.AppName, "server.tls.enabled") && (config.IsServerCertValid() || tlsConfig.GetCertificate == nil)
 	portNoTls = cmdr.GetIntRP(d.appTag, "server.ports.default", 0)
-	if config.Enabled && (config.IsServerCertValid() || tlsConfig.GetCertificate == nil) {
+	if config.Enabled && isTLS {
 		port = cmdr.GetIntRP(d.appTag, "server.ports.tls")
 	} else {
 		port = portNoTls
 	}
-
+	_, sport := LHIMakeDecisionToPort(port, isTLS)
+	if sport != "" {
+		if iport, err2 := strconv.Atoi(sport); err2 == nil {
+			port = iport
+			cmdr.Logger.Debugf("lookup port ok: %v", port)
+		}
+	}
 	if port == 0 {
 		cmdr.Logger.Fatalf("port not defined.")
 	}
 	addr := fmt.Sprintf(":%d", port) // ":3300"
 
-	serverType := cmdr.GetStringRP(d.appTag, "server.type", "")
-	serverType = cmdr.GetStringR("server.Mux", serverType)
-	switch serverType {
-	case "iris":
-		d.Type = typeIris
-	case "echo":
-		d.Type = typeEcho
-	case "gin":
-		d.Type = typeGin
-	case "gorilla":
-		d.Type = typeGorilla
-	case "default":
-		d.Type = typeDefault
-	default:
-		d.Type = typeGin
-	}
-
-	if d.routerImpl == nil {
-		switch d.Type {
-		case typeIris:
-			d.routerImpl = newIris()
-		case typeEcho:
-			d.routerImpl = newEcho()
-		case typeGin:
-			d.routerImpl = newGin()
-		case typeGorilla:
-			d.routerImpl = newGorilla()
-		case typeDefault:
-			d.routerImpl = newStdMux()
-		default:
-			d.routerImpl = newGin()
-		}
-		cmdr.Logger.Printf("serverType got: %v, %v", serverType, d.Type)
-	} else {
-		cmdr.Logger.Printf("serverType is: %v, %v | routerImpl was preset.", serverType, d.Type)
-	}
-
+	serverType := d.checkServerType()
+	d.createRouterImpl(serverType)
 	d.routerImpl.BuildRoutes()
 
 	// Create a server on port 8000
