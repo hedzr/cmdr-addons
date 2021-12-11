@@ -8,7 +8,7 @@ const (
 	// AppName const
 	AppName = "cmdr-addons"
 	// Version const
-	Version = "1.9.5"
+	Version = "1.9.6"
 	// VersionInt const
-	VersionInt = 0x010905
+	VersionInt = 0x010906
 )
