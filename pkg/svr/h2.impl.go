@@ -11,7 +11,6 @@ import (
 	"github.com/hedzr/cmdr-addons/pkg/plugins/dex/sig"
 	tls2 "github.com/hedzr/cmdr-addons/pkg/svr/tls"
 	"github.com/hedzr/cmdr/conf"
-	"github.com/kataras/iris/v12/core/host"
 	"golang.org/x/crypto/acme/autocert"
 	"gopkg.in/hedzr/errors.v2"
 	"net"
@@ -170,7 +169,7 @@ func (d *daemonImpl) checkServerType() (serverType string) {
 	serverType = cmdr.GetStringR("server.Mux", serverType)
 	switch serverType {
 	case "iris":
-		d.Type = typeIris
+		d.Type = typeIrisDisabled
 	case "echo":
 		d.Type = typeEcho
 	case "gin":
@@ -188,8 +187,8 @@ func (d *daemonImpl) checkServerType() (serverType string) {
 func (d *daemonImpl) createRouterImpl(serverType string) {
 	if d.routerImpl == nil {
 		switch d.Type {
-		case typeIris:
-			d.routerImpl = newIris()
+		case typeIrisDisabled:
+			d.routerImpl = nil // newIris()
 		case typeEcho:
 			d.routerImpl = newEcho()
 		case typeGin:
@@ -301,16 +300,17 @@ func (d *daemonImpl) onRunHttp2Server(prg *dex.Program, stopCh, doneCh chan stru
 		// Exactly how you would run an HTTP/1.1 server with TLS connection.
 		if config.Enabled && (config.IsServerCertValid() || srv.TLSConfig.GetCertificate == nil) {
 			cmdr.Logger.Printf("> Serving on %v with HTTPS...", addr)
-			if d.Type == typeIris && portNoTls > 0 {
+			if d.Type == typeIrisDisabled && portNoTls > 0 {
 				// 转发 80 到 https
 				target, _ := url.Parse("https://" + addr)
 				source := fmt.Sprintf("%s:%v", target.Hostname(), portNoTls)
 				go func() {
 					cmdr.Logger.Printf("  > Proxy from %v to HTTPS...", source)
-					err := host.NewProxy(source, target).ListenAndServe()
-					if err != nil {
-						cmdr.Logger.Fatalf("proxy at %v failed: %v", source, err)
-					}
+
+					//err := host.NewProxy(source, target).ListenAndServe()
+					//if err != nil {
+					//	cmdr.Logger.Fatalf("proxy at %v failed: %v", source, err)
+					//}
 				}()
 			}
 			// if cmdr.FileExists("ci/certs/server.cert") && cmdr.FileExists("ci/certs/server.key") {

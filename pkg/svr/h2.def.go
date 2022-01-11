@@ -7,7 +7,7 @@ const (
 
 	typeDefault muxType = iota
 	typeGin
-	typeIris
+	typeIrisDisabled
 	typeGorilla
 	typeEcho
 )
