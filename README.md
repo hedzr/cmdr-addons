@@ -11,14 +11,23 @@ see also [`cmdr`](https://github.com/hedzr/cmdr).
 
 ## Prerequisites
 
-### v1.9.8 and newer
+### v1.9.8-p3 and newer
 
+golang 1.15+ required.
+
+> **Causes**:  
+> 1. golang.org/x/net/http2 used errors.Is()
+> 2. golang.org/x/net/http2 used os.ErrDeadlineExceeded
+
+Updates:
 1. removed iris/v12 [`import "github.com/hedzr/cmdr-addons v1.9.8-p3"`]
 2. seems ci not good for go1.14
 
+
+
 ### v1.9.7 and older
 
-golang 1.13+ ONLY!
+golang 1.13+ required.
 
 > **Causes**:  
 >   github.com/kataras/iris/v12@v12.1.8/core/errgroup/errgroup.go:109:9: undefined: errors.Unwrap
