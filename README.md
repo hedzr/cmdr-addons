@@ -11,6 +11,13 @@ see also [`cmdr`](https://github.com/hedzr/cmdr).
 
 ## Prerequisites
 
+### v1.9.8 and newer
+
+1. removed iris/v12 [`import "github.com/hedzr/cmdr-addons v1.9.8-p3"`]
+2. seems ci not good for go1.14
+
+### v1.9.7 and older
+
 golang 1.13+ ONLY!
 
 > **Causes**:  
