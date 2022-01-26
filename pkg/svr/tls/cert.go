@@ -11,6 +11,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"github.com/hedzr/cmdr"
+	"github.com/hedzr/log/dir"
 	"io/ioutil"
 	"math/big"
 	"net"
@@ -77,12 +78,12 @@ func CertCreate(cmd *cmdr.Command, args []string) (err error) {
 	hosts := cmdr.GetStringSliceRP(prefix, "create.host")
 
 	outputDir := ""
-	for _, dir := range outputDirs {
-		err = cmdr.EnsureDir(dir)
+	for _, d := range outputDirs {
+		err = dir.EnsureDir(d)
 		if err != nil {
 			panic(err)
 		}
-		outputDir = dir
+		outputDir = d
 	}
 
 	var (
@@ -150,7 +151,7 @@ func newCaCerts(outputDir string, notBefore, notAfter time.Time, serialNumberLim
 	caKeyPath = path.Join(outputDir, rootKeyFileName)
 	caPath = path.Join(outputDir, rootCertFileName)
 
-	if cmdr.FileExists(caKeyPath) && cmdr.FileExists(caPath) {
+	if dir.FileExists(caKeyPath) && dir.FileExists(caPath) {
 		cmdr.Logger.Infof("ignore recreating certs: %v, %v", caKeyPath, caPath)
 		return // exists, ignore creating
 	}
@@ -207,7 +208,7 @@ func newLeafCerts(outputDir string, notBefore, notAfter time.Time, serialNumberL
 	cbPath = path.Join(outputDir, leafCertBundleFileName)
 	caPath = path.Join(outputDir, rootCertFileName)
 
-	if cmdr.FileExists(cKeyPath) && cmdr.FileExists(cPath) {
+	if dir.FileExists(cKeyPath) && dir.FileExists(cPath) {
 		cmdr.Logger.Infof("ignore recreating certs: %v, %v", cKeyPath, cPath)
 		return // exists, ignore creating
 	}
@@ -269,7 +270,7 @@ func newClientCerts(outputDir string, notBefore, notAfter time.Time, rootTemplat
 	cKeyPath = path.Join(outputDir, clientKeyFileName)
 	cPath = path.Join(outputDir, clientCertFileName)
 
-	if cmdr.FileExists(cKeyPath) && cmdr.FileExists(cPath) {
+	if dir.FileExists(cKeyPath) && dir.FileExists(cPath) {
 		cmdr.Logger.Infof("ignore recreating certs: %v, %v", cKeyPath, cPath)
 		return // exists, ignore creating
 	}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/c-bata/go-prompt"
 	"github.com/hedzr/cmdr"
+	"github.com/hedzr/log/dir"
 	"os"
 	"os/exec"
 	"strings"
@@ -80,7 +81,7 @@ func executor(in string) {
 		os.Exit(0)
 	}
 
-	fmt.Println("Your input: " + in + " | for running " + cmdr.GetExecutablePath())
+	fmt.Println("Your input: " + in + " | for running " + dir.GetExecutablePath())
 
 	// cmd := exec.Command("/bin/sh", "-c", cmdr.GetExcutablePath()+" "+in)
 	// cmd.Stdin = os.Stdin

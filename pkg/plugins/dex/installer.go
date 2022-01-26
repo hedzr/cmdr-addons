@@ -7,6 +7,7 @@ package dex
 import (
 	"fmt"
 	"github.com/hedzr/cmdr"
+	"github.com/hedzr/log/dir"
 	"gopkg.in/hedzr/errors.v2"
 	"io/ioutil"
 	"log"
@@ -24,10 +25,10 @@ func runInstaller(cmd *cmdr.Command, args []string) (err error) {
 		data     *tplData
 	)
 
-	if cmdr.FileExists(systemdDir) {
+	if dir.FileExists(systemdDir) {
 		data = &tplData{
 			*cmd.GetRoot(),
-			cmdr.GetExecutablePath(),
+			dir.GetExecutablePath(),
 		}
 
 		fileName = fmt.Sprintf("%s/%s@.service", systemdDir, data.AppName)
@@ -67,14 +68,14 @@ func runUninstaller(cmd *cmdr.Command, args []string) (err error) {
 		data     *tplData
 	)
 
-	if cmdr.FileExists(systemdDir) {
+	if dir.FileExists(systemdDir) {
 		data = &tplData{
 			*cmd.GetRoot(),
-			cmdr.GetExecutablePath(),
+			dir.GetExecutablePath(),
 		}
 
 		fileName = fmt.Sprintf("%s/%s@.service", systemdDir, data.AppName)
-		if cmdr.FileExists(fileName) {
+		if dir.FileExists(fileName) {
 			err = os.Remove(fileName)
 		}
 		_ = shellRunAuto("systemctl", "daemon-reload")

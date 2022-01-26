@@ -1,6 +1,9 @@
 .idea/
 *.iml
 .DS\_Store
+
+Makefile
+
 tmp/
 bin/
 output/

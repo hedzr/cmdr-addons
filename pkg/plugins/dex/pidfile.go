@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/hedzr/cmdr"
 	"github.com/hedzr/cmdr-addons/pkg/plugins/dex/sig"
+	"github.com/hedzr/log/dir"
 	"gopkg.in/hedzr/errors.v2"
 	"io/ioutil"
 	"log"
@@ -43,7 +44,7 @@ func (pf *pidFileStruct) Destroy() {
 	// if cmdr.GetBoolR("server.start.in-daemon") {
 	//	//
 	// }
-	if cmdr.FileExists(pf.Path) {
+	if dir.FileExists(pf.Path) {
 		err := os.RemoveAll(pf.Path)
 		if err != nil {
 			panic(errors.New("Failed to destroy pid file %q", pf.Path).Attach(err))

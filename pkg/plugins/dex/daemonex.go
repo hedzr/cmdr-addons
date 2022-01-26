@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/hedzr/cmdr"
 	"github.com/hedzr/log"
+	"github.com/hedzr/log/dir"
 	"github.com/kardianos/service"
 	"os"
 	"path"
@@ -204,10 +205,10 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 
 	if len(pd.Config.WorkingDirectory) == 0 {
 		workDir := path.Join("/var/lib", pd.Config.Name)
-		if cmdr.FileExists(workDir) {
+		if dir.FileExists(workDir) {
 			pd.Config.WorkingDirectory = workDir
 		} else {
-			pd.Config.WorkingDirectory = cmdr.GetExecutableDir()
+			pd.Config.WorkingDirectory = dir.GetExecutableDir()
 		}
 	}
 
@@ -215,7 +216,7 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 		pd.Config.Option["PIDFile"] = pd.PidFileName()
 
 		logDir := path.Dir(pd.LogStdoutFileName()) // "/var/log" // path.Join("/var", "log") // , conf.AppName)
-		if cmdr.FileExists(logDir) {
+		if dir.FileExists(logDir) {
 			// logFile := path.Join(logDir, conf.AppName, ".out")
 			// errFile := path.Join(logDir, conf.AppName, ".err")
 			pd.Config.Option["LogOutput"] = true

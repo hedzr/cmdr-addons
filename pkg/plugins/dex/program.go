@@ -8,6 +8,7 @@ import (
 	"github.com/hedzr/cmdr-addons/pkg/plugins/dex/sig"
 	"github.com/hedzr/cmdr/conf"
 	"github.com/hedzr/log"
+	"github.com/hedzr/log/dir"
 	"github.com/kardianos/service"
 	"os"
 	"os/user"
@@ -66,18 +67,18 @@ func (p *Program) prepareAppDirs() (err error) {
 	currUser, err = user.Current()
 
 	for _, pdir := range []string{"/var/lib", "/var/log", "/var/run"} {
-		dir := path.Join(pdir, p.Config.Name)
-		if !cmdr.FileExists(dir) {
+		d := path.Join(pdir, p.Config.Name)
+		if !dir.FileExists(d) {
 			fmt.Printf(`The directory %q needs be created via sudo priviledge, 
 so the OS account password will be prompted via:
-'sudo mkdir %q':`, dir, dir)
-			_, _, err = sudo("mkdir", dir)
-			_, _, err = sudo("chown", "-R", currUser.Username, dir)
-			_, _, err = sudo("chmod", "-R", "0770", dir)
+'sudo mkdir %q':`, d, d)
+			_, _, err = sudo("mkdir", d)
+			_, _, err = sudo("chown", "-R", currUser.Username, d)
+			_, _, err = sudo("chmod", "-R", "0770", d)
 		}
 	}
 
-	if !cmdr.FileExists(p.EnvFileName()) && runtime.GOOS == "linux" {
+	if !dir.FileExists(p.EnvFileName()) && runtime.GOOS == "linux" {
 		// var f *os.File
 		// f, err = os.OpenFile(p.EnvFileName(), os.O_CREATE|os.O_WRONLY, 0770)
 		// if err != nil {
@@ -180,7 +181,7 @@ func (p *Program) EnvFileName() string {
 	// if runtime.GOOS == "darwin" {
 	// 	return os.ExpandEnv("/tmp/$APPNAME")
 	// }
-	if cmdr.FileExists("/etc/default") {
+	if dir.FileExists("/etc/default") {
 		return os.ExpandEnv("/etc/default/$APPNAME")
 	}
 	return os.ExpandEnv("/etc/sysconfig/$APPNAME")

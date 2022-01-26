@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"github.com/hedzr/cmdr"
+	"github.com/hedzr/log/dir"
 	"gopkg.in/hedzr/errors.v2"
 	"io/ioutil"
 	"net"
@@ -75,17 +76,17 @@ func (s *CmdrTLSConfig) InitTLSConfigFromCommandline(prefix string) {
 	}
 
 	for _, loc := range cmdr.GetStringSliceRP(prefix, "locations") {
-		if s.Cacert != "" && cmdr.FileExists(path.Join(loc, s.Cacert)) {
+		if s.Cacert != "" && dir.FileExists(path.Join(loc, s.Cacert)) {
 			s.Cacert = path.Join(loc, s.Cacert)
 		} else if s.Cacert != "" {
 			continue
 		}
-		if s.Cert != "" && cmdr.FileExists(path.Join(loc, s.Cert)) {
+		if s.Cert != "" && dir.FileExists(path.Join(loc, s.Cert)) {
 			s.Cert = path.Join(loc, s.Cert)
 		} else if s.Cert != "" {
 			continue
 		}
-		if s.Key != "" && cmdr.FileExists(path.Join(loc, s.Key)) {
+		if s.Key != "" && dir.FileExists(path.Join(loc, s.Key)) {
 			s.Key = path.Join(loc, s.Key)
 		} else if s.Key != "" {
 			continue
@@ -130,17 +131,17 @@ func (s *CmdrTLSConfig) InitTLSConfigFromConfigFile(appTag, prefix string) {
 
 		for _, loc := range cmdr.GetStringSliceRP(prefix, "locations") {
 			cmdr.Logger.Debugf("> tls - testing loc: %v", loc)
-			if s.Cacert != "" && cmdr.FileExists(path.Join(loc, s.Cacert)) {
+			if s.Cacert != "" && dir.FileExists(path.Join(loc, s.Cacert)) {
 				s.Cacert = path.Join(loc, s.Cacert)
 			} else if s.Cacert != "" {
 				continue
 			}
-			if s.Cert != "" && cmdr.FileExists(path.Join(loc, s.Cert)) {
+			if s.Cert != "" && dir.FileExists(path.Join(loc, s.Cert)) {
 				s.Cert = path.Join(loc, s.Cert)
 			} else if s.Cert != "" {
 				continue
 			}
-			if s.Key != "" && cmdr.FileExists(path.Join(loc, s.Key)) {
+			if s.Key != "" && dir.FileExists(path.Join(loc, s.Key)) {
 				s.Key = path.Join(loc, s.Key)
 			} else if s.Key != "" {
 				continue
@@ -196,7 +197,7 @@ func (s *CmdrTLSConfig) newTLSConfig() (config *tls.Config, err error) {
 	var cert tls.Certificate
 	cert, err = tls.LoadX509KeyPair(s.Cert, s.Key)
 	if err != nil {
-		err = errors.New("error parsing X509 certificate/key pair, pwd=%q, cert=%q", cmdr.GetCurrentDir(), s.Cert).Attach(err)
+		err = errors.New("error parsing X509 certificate/key pair, pwd=%q, cert=%q", dir.GetCurrentDir(), s.Cert).Attach(err)
 		return
 	}
 	cert.Leaf, err = x509.ParseCertificate(cert.Certificate[0])

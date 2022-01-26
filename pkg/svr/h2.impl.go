@@ -11,6 +11,7 @@ import (
 	"github.com/hedzr/cmdr-addons/pkg/plugins/dex/sig"
 	tls2 "github.com/hedzr/cmdr-addons/pkg/svr/tls"
 	"github.com/hedzr/cmdr/conf"
+	"github.com/hedzr/log/dir"
 	"golang.org/x/crypto/acme/autocert"
 	"gopkg.in/hedzr/errors.v2"
 	"net"
@@ -361,7 +362,7 @@ func (d *daemonImpl) serve(prg *dex.Program, srv *http.Server, listener net.List
 	if listener == nil {
 		if cmdr.GetBoolR("server.start.socket") {
 			sf := prg.SocketFileName()
-			if cmdr.GetBoolR("server.start.reset-socket-file") && cmdr.FileExists(sf) {
+			if cmdr.GetBoolR("server.start.reset-socket-file") && dir.FileExists(sf) {
 				err = os.Remove(sf)
 				if err != nil {
 					return err
