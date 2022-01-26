@@ -14,10 +14,10 @@ require (
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/gin-gonic/gin v1.7.7
 	github.com/gorilla/mux v1.8.0
-	github.com/hedzr/cmdr v1.9.9
-	github.com/hedzr/log v1.5.0
+	github.com/hedzr/cmdr v1.10.0
+	github.com/hedzr/log v1.5.3
 	github.com/kardianos/service v1.2.1
-	github.com/labstack/echo-contrib v0.11.0
+	github.com/labstack/echo-contrib v0.12.0
 	github.com/labstack/echo/v4 v4.6.3
 	github.com/labstack/gommon v0.3.1
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
