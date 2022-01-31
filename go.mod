@@ -14,7 +14,7 @@ require (
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/gin-gonic/gin v1.7.7
 	github.com/gorilla/mux v1.8.0
-	github.com/hedzr/cmdr v1.10.9
+	github.com/hedzr/cmdr v1.10.11
 	github.com/hedzr/log v1.5.9
 	github.com/kardianos/service v1.2.1
 	github.com/labstack/echo-contrib v0.12.0
