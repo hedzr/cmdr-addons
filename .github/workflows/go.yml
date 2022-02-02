@@ -38,10 +38,11 @@ jobs:
 
       - name: Test
         run: |
-          for GOOS in $(go tool dist list|awk -F'/' '{print $1}'|sort -u); do
-            echo -e "\n\nTESTING FOR $GOOS ...\n"
-            go test -v -race -coverprofile=profile.cov ./...
-          done
+          #for GOOS in $(go tool dist list|awk -F'/' '{print $1}'|sort -u); do
+          #  echo -e "\n\nTESTING FOR $GOOS ...\n"
+          #  go test -v -race -coverprofile=profile.cov ./...
+          #done
+          go test -v -race -coverprofile=profile.cov ./...
 
       - name: Send coverage
         uses: shogo82148/actions-goveralls@v1
