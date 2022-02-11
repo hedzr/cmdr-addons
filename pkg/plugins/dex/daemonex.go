@@ -212,7 +212,10 @@ func prepare(daemonImplObject Daemon, cmd *cmdr.RootCommand) (err error) {
 		}
 	}
 
-	if runtime.GOOS != "windows" {
+	m := map[string]func(){
+		"windows": func() {},
+	}
+	if _, ok := m[runtime.GOOS]; !ok {
 		pd.Config.Option["PIDFile"] = pd.PidFileName()
 
 		logDir := path.Dir(pd.LogStdoutFileName()) // "/var/log" // path.Join("/var", "log") // , conf.AppName)

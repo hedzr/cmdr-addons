@@ -93,7 +93,7 @@ func executor(in string) {
 }
 
 func completer(in prompt.Document) []prompt.Suggest {
-	cmd, err := cmdr.Match(in.Text)
+	cmd, err := cmdr.MatchAndTest(in.Text)
 
 	// var names string
 	// if cmd != nil {
