@@ -32,16 +32,17 @@ func WithShellModule() cmdr.ExecOption {
 			// attachPreAction(root, preAction)
 			// attachPostAction(root, postAction)
 
-			rootOpt := cmdr.NewCmdFrom(&root.Command)
-			shell := rootOpt.NewSubCommand().
+			//rootCmd1Opt := cmdr.NewCmdFrom(&root.Command)
+			shell := cmdr.NewSubCmd().
 				Titles("shell", "sh").
 				Description("enable internal shell prompt mode", "").
-				Action(doShellModeAction)
-			shell.NewFlagV(true).Titles("demo-0", "0").ToggleGroup("Sample")
-			shell.NewFlagV(false).Titles("demo-1", "1").ToggleGroup("Sample")
-			shell.NewFlagV(false).Titles("demo-2", "2").ToggleGroup("Sample")
-			shell.NewFlagV(false).Titles("demo-3", "3").ToggleGroup("Sample")
-			shell.NewFlagV(false).Titles("demo-4", "4").ToggleGroup("Sample")
+				Action(doShellModeAction).
+				AttachToRoot(root)
+			cmdr.NewBool(true).Titles("demo-0", "0").ToggleGroup("Sample").AttachTo(shell)
+			cmdr.NewBool(false).Titles("demo-1", "1").ToggleGroup("Sample").AttachTo(shell)
+			cmdr.NewBool(false).Titles("demo-2", "2").ToggleGroup("Sample").AttachTo(shell)
+			cmdr.NewBool(false).Titles("demo-3", "3").ToggleGroup("Sample").AttachTo(shell)
+			cmdr.NewBool(false).Titles("demo-4", "4").ToggleGroup("Sample").AttachTo(shell)
 		})
 	}
 }

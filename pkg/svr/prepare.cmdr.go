@@ -19,10 +19,11 @@ func (d *daemonImpl) OnCmdrPrepare(prog *dex.Program, root *cmdr.RootCommand) (e
 		flg.DefaultValue = defaultPort
 
 	} else {
-		opt.NewFlagV(defaultPort, "port", "p").
+		cmdr.NewInt(defaultPort).Titles("port", "p").
 			Description("the port to listen.", "").
 			Group("").
-			Placeholder("PORT")
+			Placeholder("PORT").
+			AttachTo(opt)
 	}
 
 	ox := cmdr.NewCmdFrom(serverStartCmd)
@@ -59,23 +60,29 @@ func (d *daemonImpl) OnCmdrPrepare(prog *dex.Program, root *cmdr.RootCommand) (e
 
 	//
 
-	certOptCmd := opt.NewSubCommand("certs", "ca").
+	certOptCmd := cmdr.NewSubCmd().Titles("certs", "ca").
 		Description("certificates operations...", "").
-		Group("CA")
-	certCreateCmd := certOptCmd.NewSubCommand("create", "c").
+		Group("CA").
+		AttachTo(opt)
+	certCreateCmd := cmdr.NewSubCmd().Titles("create", "c").
 		Description("create CA, server and client certificates").
-		Action(tls.CertCreate)
-	certCreateCmd.NewFlagV([]string{}, "host", "h").
+		Action(tls.CertCreate).
+		AttachTo(certOptCmd)
+	cmdr.NewStringSlice().Titles("host", "h").
 		Description("Comma-separated hostnames and IPs to generate a certificate for").
-		Placeholder("HOSTNAMES,...")
-	certCreateCmd.NewFlagV("", "start-date", "f", "from", "valid-from").
+		Placeholder("HOSTNAMES,...").
+		AttachTo(certCreateCmd)
+	cmdr.NewString().Titles("start-date", "f", "from", "valid-from").
 		Description("Creation date formatted as Jan 1 15:04:05 2011 (default now)").
-		Placeholder("DATETIME")
-	certCreateCmd.NewFlagV(365*10*24*time.Hour, "valid-for", "duration", "d").
-		Description("Duration that certificate is valid for")
-	certCreateCmd.NewFlagV("", "CN", "cn", "common-name").
+		Placeholder("DATETIME").
+		AttachTo(certCreateCmd)
+	cmdr.NewDuration(365*10*24*time.Hour).Titles("valid-for", "duration", "d").
+		Description("Duration that certificate is valid for").
+		AttachTo(certCreateCmd)
+	cmdr.NewString().Titles("CN", "cn", "common-name").
 		Description("common name string").
-		Placeholder("CN")
+		Placeholder("CN").
+		AttachTo(certCreateCmd)
 
 	// caCmd := certOptCmd.NewSubCommand("ca").
 	// 	Description("certification tool (such as create-ca, create-cert, ...)", "certification tool (such as create-ca, create-cert, ...          )\nverbose long descriptions here.").
@@ -114,14 +121,15 @@ func (d *daemonImpl) OnCmdrPrepare(prog *dex.Program, root *cmdr.RootCommand) (e
 
 	// http 2 client
 
-	cmdr.NewCmdFrom(&root.Command).NewSubCommand().
+	cmdr.NewSubCmd().
 		Titles("h2-test", "h2").
 		Description("test http 2 client", "test http 2 client,\nverbose long descriptions here.").
 		Group("Test").
 		Action(func(cmd *cmdr.Command, args []string) (err error) {
 			// runClient()
 			return
-		})
+		}).
+		AttachToRoot(root)
 	return
 }
 

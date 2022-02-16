@@ -15,7 +15,7 @@ import (
 
 func tplApply(tmpl string, data interface{}) string {
 	var w = new(bytes.Buffer)
-	var tpl = template.Must(template.New("y").Parse(tmpl))
+	var tpl = template.Must(template.New("tmpl-expanding").Parse(tmpl))
 	if err := tpl.Execute(w, data); err != nil {
 		pd.log.Errorf("tpl execute error: %v", err)
 	}
