@@ -1,12 +1,12 @@
-//+build !plan9
-//+build !nacl
+//go:build !plan9 && !nacl
+// +build !plan9,!nacl
 
 // Copyright © 2020 Hedzr Yeh.
 
 package dex
 
 import (
-	"gopkg.in/hedzr/errors.v2"
+	"gopkg.in/hedzr/errors.v3"
 	"os"
 	"os/exec"
 	"syscall"

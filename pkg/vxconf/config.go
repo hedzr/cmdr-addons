@@ -12,7 +12,7 @@ import (
 	"sync"
 	"syscall"
 
-	"gopkg.in/hedzr/errors.v2"
+	"gopkg.in/hedzr/errors.v3"
 )
 
 type KVStore map[string]string

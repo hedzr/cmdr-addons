@@ -9,7 +9,7 @@ import (
 	"github.com/hedzr/cmdr"
 	"github.com/hedzr/cmdr-addons/pkg/plugins/dex/sig"
 	"github.com/hedzr/log/dir"
-	"gopkg.in/hedzr/errors.v2"
+	"gopkg.in/hedzr/errors.v3"
 	"io/ioutil"
 	"log"
 	"os"

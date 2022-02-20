@@ -13,7 +13,7 @@ import (
 	"github.com/hedzr/cmdr/conf"
 	"github.com/hedzr/log/dir"
 	"golang.org/x/crypto/acme/autocert"
-	"gopkg.in/hedzr/errors.v2"
+	"gopkg.in/hedzr/errors.v3"
 	"net"
 	"net/http"
 	"net/url"
