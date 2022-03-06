@@ -34,7 +34,7 @@ func (pf *pidFileStruct) Create(cmd *cmdr.Command) {
 	// }
 	f, err := os.OpenFile(pf.Path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0770)
 	if err != nil {
-		panic(errors.New("Failed to create pid file %q", pf.Path).Attach(err))
+		panic(errors.New("Failed to create pid file %q", pf.Path).WithErrors(err))
 	}
 	defer f.Close()
 	f.WriteString(fmt.Sprintf("%v", os.Getpid()))
@@ -47,7 +47,7 @@ func (pf *pidFileStruct) Destroy() {
 	if dir.FileExists(pf.Path) {
 		err := os.RemoveAll(pf.Path)
 		if err != nil {
-			panic(errors.New("Failed to destroy pid file %q", pf.Path).Attach(err))
+			panic(errors.New("Failed to destroy pid file %q", pf.Path).WithErrors(err))
 		}
 	}
 }

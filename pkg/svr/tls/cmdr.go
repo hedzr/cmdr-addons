@@ -197,12 +197,12 @@ func (s *CmdrTLSConfig) newTLSConfig() (config *tls.Config, err error) {
 	var cert tls.Certificate
 	cert, err = tls.LoadX509KeyPair(s.Cert, s.Key)
 	if err != nil {
-		err = errors.New("error parsing X509 certificate/key pair, pwd=%q, cert=%q", dir.GetCurrentDir(), s.Cert).Attach(err)
+		err = errors.New("error parsing X509 certificate/key pair, pwd=%q, cert=%q", dir.GetCurrentDir(), s.Cert).WithErrors(err)
 		return
 	}
 	cert.Leaf, err = x509.ParseCertificate(cert.Certificate[0])
 	if err != nil {
-		err = errors.New("error parsing certificate").Attach(err)
+		err = errors.New("error parsing certificate").WithErrors(err)
 		return
 	}
 

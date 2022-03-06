@@ -86,12 +86,12 @@ func runCommand(command string, readStdout bool, arguments ...string) (int, stri
 		if ok {
 			// Command didn't exit with a zero exit status.
 			// return exitStatus, output, fmt.Errorf("%q failed: %w |\n  stderr: %s", command, err, slurp)
-			return exitStatus, output, errors.New("%q failed: %s |\n  stderr: %s", command, err.Error(), slurp).Attach(err)
+			return exitStatus, output, errors.New("%q failed: %s |\n  stderr: %s", command, err.Error(), slurp).WithErrors(err)
 		}
 
 		// An error occurred and there is no exit status.
 		// return 0, output, fmt.Errorf("%q failed: %w |\n  stderr: %s", command, err, slurp)
-		return 0, output, errors.New("%q failed: %s |\n  stderr: %s", command, err.Error(), slurp).Attach(err)
+		return 0, output, errors.New("%q failed: %s |\n  stderr: %s", command, err.Error(), slurp).WithErrors(err)
 	}
 
 	return 0, output, nil

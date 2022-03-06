@@ -371,13 +371,13 @@ func (d *daemonImpl) serve(prg *dex.Program, srv *http.Server, listener net.List
 			cmdr.Logger.Infof("listening on unix sock file: %v", sf)
 			listener, err = net.Listen("unix", sf)
 			if err != nil {
-				err = errors.New("Cannot bind to unix sock %q", sf).Attach(err)
+				err = errors.New("Cannot bind to unix sock %q", sf).WithErrors(err)
 				return err
 			}
 		} else {
 			listener, err = net.Listen("tcp", addr)
 			if err != nil {
-				err = errors.New("Cannot bind to address %v", addr).Attach(err)
+				err = errors.New("Cannot bind to address %v", addr).WithErrors(err)
 				return err
 			}
 		}
