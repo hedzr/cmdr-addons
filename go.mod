@@ -14,14 +14,14 @@ require (
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/gin-gonic/gin v1.7.7
 	github.com/gorilla/mux v1.8.0
-	github.com/hedzr/cmdr v1.10.35
-	github.com/hedzr/log v1.5.45
+	github.com/hedzr/cmdr v1.10.40
+	github.com/hedzr/log v1.5.50
 	github.com/kardianos/service v1.2.1
 	github.com/labstack/echo-contrib v0.12.0
 	github.com/labstack/echo/v4 v4.7.0
 	github.com/labstack/gommon v0.3.1
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
-	gopkg.in/hedzr/errors.v3 v3.0.17
+	gopkg.in/hedzr/errors.v3 v3.0.20
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
@@ -35,7 +35,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hedzr/cmdr-base v0.1.3 // indirect
-	github.com/hedzr/logex v1.5.46 // indirect
+	github.com/hedzr/logex v1.5.50 // indirect
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
 	github.com/kr/text v0.2.0 // indirect
