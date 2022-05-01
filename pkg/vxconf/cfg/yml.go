@@ -4,8 +4,8 @@ package cfg
 
 import (
 	"github.com/hedzr/cmdr-addons/pkg/vxconf"
+	"github.com/hedzr/log/dir"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
 )
 
 // YAML -----------------------------------------------------------------------
@@ -17,7 +17,7 @@ func ParseYaml(cfg string) (*AppConfig, error) {
 
 // ParseYamlFile reads a YAML configuration from the given filename.
 func ParseYamlFile(filename string) (*AppConfig, error) {
-	cfg, err := ioutil.ReadFile(filename)
+	cfg, err := dir.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}

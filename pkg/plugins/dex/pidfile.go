@@ -10,7 +10,6 @@ import (
 	"github.com/hedzr/cmdr-addons/pkg/plugins/dex/sig"
 	"github.com/hedzr/log/dir"
 	"gopkg.in/hedzr/errors.v3"
-	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
@@ -90,7 +89,7 @@ func IsPidFileExists() bool {
 // FindDaemonProcess locates the daemon process if running
 func FindDaemonProcess() (present bool, process *os.Process) {
 	if IsPidFileExists() {
-		s, _ := ioutil.ReadFile(pd.PidFileName())
+		s, _ := dir.ReadFile(pd.PidFileName())
 		pid, err := strconv.ParseInt(string(s), 0, 64)
 		if err != nil {
 			log.Fatal(err)

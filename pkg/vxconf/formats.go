@@ -5,8 +5,8 @@ package vxconf
 import (
 	"encoding/json"
 	"github.com/hedzr/cmdr"
+	"github.com/hedzr/log/dir"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
 )
 
 func JsonToString(in interface{}, pretty bool) string {
@@ -50,7 +50,7 @@ func ParseJson(cfg string) (*AppConfig, error) {
 
 // ParseJsonFile reads a JSON configuration from the given filename.
 func ParseJsonFile(filename string) (*AppConfig, error) {
-	cfg, err := ioutil.ReadFile(filename)
+	cfg, err := dir.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func ParseYaml(cfg string) (*AppConfig, error) {
 
 // ParseYamlFile reads a YAML configuration from the given filename.
 func ParseYamlFile(filename string) (*AppConfig, error) {
-	cfg, err := ioutil.ReadFile(filename)
+	cfg, err := dir.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}

@@ -5,9 +5,9 @@ package dex
 import (
 	"bytes"
 	"fmt"
+	"github.com/hedzr/log/dir"
 	"gopkg.in/hedzr/errors.v3"
 	"io"
-	"io/ioutil"
 	"os/exec"
 )
 
@@ -65,14 +65,14 @@ func runCommand(command string, readStdout bool, arguments ...string) (int, stri
 	// Darwin: launchctl can fail with a zero exit status,
 	// so check for emtpy stderr
 	if command == "launchctl" {
-		slurp, _ := ioutil.ReadAll(stderr)
+		slurp, _ := dir.ReadAll(stderr)
 		if len(slurp) > 0 && !bytes.HasSuffix(slurp, []byte("Operation now in progress\n")) {
 			return 0, "", fmt.Errorf("%q failed with stderr: %s", command, slurp)
 		}
 	}
 
 	if readStdout {
-		out, err := ioutil.ReadAll(stdout)
+		out, err := dir.ReadAll(stdout)
 		if err != nil {
 			return 0, "", fmt.Errorf("%q failed while attempting to read stdout: %v", command, err)
 		} else if len(out) > 0 {
@@ -82,7 +82,7 @@ func runCommand(command string, readStdout bool, arguments ...string) (int, stri
 
 	if err := cmd.Wait(); err != nil {
 		exitStatus, ok := isExitError(err)
-		slurp, _ := ioutil.ReadAll(stderr)
+		slurp, _ := dir.ReadAll(stderr)
 		if ok {
 			// Command didn't exit with a zero exit status.
 			// return exitStatus, output, fmt.Errorf("%q failed: %w |\n  stderr: %s", command, err, slurp)

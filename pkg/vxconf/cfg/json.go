@@ -4,7 +4,7 @@ package cfg
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"github.com/hedzr/log/dir"
 )
 
 // JSON -----------------------------------------------------------------------
@@ -16,7 +16,7 @@ func ParseJSON(cfg string) (*AppConfig, error) {
 
 // ParseJSONFile reads a JSON configuration from the given filename.
 func ParseJSONFile(filename string) (*AppConfig, error) {
-	cfg, err := ioutil.ReadFile(filename)
+	cfg, err := dir.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}

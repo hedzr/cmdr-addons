@@ -8,7 +8,6 @@ import (
 	"github.com/hedzr/cmdr"
 	"github.com/hedzr/log/dir"
 	"gopkg.in/hedzr/errors.v3"
-	"io/ioutil"
 	"net"
 	"os"
 	"path"
@@ -171,12 +170,12 @@ func (s *CmdrTLSConfig) ToServerTLSConfig() (config *tls.Config) {
 	if err == nil {
 		if s.Cacert != "" {
 			var rootPEM []byte
-			rootPEM, err = ioutil.ReadFile(s.Cacert)
+			rootPEM, err = dir.ReadFile(s.Cacert)
 			if err != nil || rootPEM == nil {
 				return
 			}
 			pool := x509.NewCertPool()
-			ok := pool.AppendCertsFromPEM([]byte(rootPEM))
+			ok := pool.AppendCertsFromPEM(rootPEM)
 			if ok {
 				config.ClientCAs = pool
 			}
@@ -222,12 +221,12 @@ func (s *CmdrTLSConfig) newTLSConfig() (config *tls.Config, err error) {
 	if s.ClientAuth {
 		if s.Cacert != "" {
 			var rootPEM []byte
-			rootPEM, err = ioutil.ReadFile(s.Cacert)
+			rootPEM, err = dir.ReadFile(s.Cacert)
 			if err != nil || rootPEM == nil {
 				return nil, err
 			}
 			pool := x509.NewCertPool()
-			ok := pool.AppendCertsFromPEM([]byte(rootPEM))
+			ok := pool.AppendCertsFromPEM(rootPEM)
 			if !ok {
 				err = errors.New("failed to parse root ca certificate")
 			}
@@ -303,7 +302,7 @@ func (s *CmdrTLSConfig) Dial(network, addr string) (conn net.Conn, err error) {
 func (s *CmdrTLSConfig) addCert(roots *x509.CertPool, certPath string) (err error) {
 	if certPath != "" {
 		var rootPEM []byte
-		rootPEM, err = ioutil.ReadFile(certPath)
+		rootPEM, err = dir.ReadFile(certPath)
 		if err != nil {
 			return
 		}

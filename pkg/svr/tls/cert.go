@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"github.com/hedzr/cmdr"
 	"github.com/hedzr/log/dir"
-	"io/ioutil"
 	"math/big"
 	"net"
 	"os"
@@ -342,7 +341,7 @@ func appendCertToFile(filename, appendFilename string) {
 	}
 
 	var c []byte
-	c, err = ioutil.ReadFile(appendFilename)
+	c, err = dir.ReadFile(appendFilename)
 	if err != nil {
 		cmdr.Logger.Fatalf("failed to open %v for reading: %s", appendFilename, err)
 	}

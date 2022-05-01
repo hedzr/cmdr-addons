@@ -9,7 +9,6 @@ import (
 	"github.com/hedzr/cmdr"
 	"github.com/hedzr/log/dir"
 	"gopkg.in/hedzr/errors.v3"
-	"io/ioutil"
 	"log"
 	"os"
 )
@@ -33,14 +32,14 @@ func runInstaller(cmd *cmdr.Command, args []string) (err error) {
 
 		fileName = fmt.Sprintf("%s/%s@.service", systemdDir, data.AppName)
 		contents = tplApply(tplService, data)
-		err = ioutil.WriteFile(fileName, []byte(contents), 0644)
+		err = dir.WriteFile(fileName, []byte(contents), 0644)
 		if err != nil {
 			return
 		}
 
 		fileName = fmt.Sprintf("%v/%v", defaultsDir, data.AppName)
 		contents = tplApply(tplDefault, data)
-		err = ioutil.WriteFile(fileName, []byte(contents), 0755)
+		err = dir.WriteFile(fileName, []byte(contents), 0755)
 		if err != nil {
 			return
 		}
