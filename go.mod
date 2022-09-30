@@ -18,7 +18,7 @@ require (
 	github.com/hedzr/log v1.5.53
 	github.com/kardianos/service v1.2.1
 	github.com/labstack/echo-contrib v0.12.0
-	github.com/labstack/echo/v4 v4.7.0
+	github.com/labstack/echo/v4 v4.9.0
 	github.com/labstack/gommon v0.3.1
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	gopkg.in/hedzr/errors.v3 v3.0.21
