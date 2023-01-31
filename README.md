@@ -11,6 +11,12 @@ see also [`cmdr`](https://github.com/hedzr/cmdr).
 
 ## Prerequisites
 
+### v1.11.6 and newer
+
+golang 1.17+ required
+
+> The constraints are from updating via go modules.
+
 ### v1.9.8-p3 and newer
 
 golang 1.15+ required.
