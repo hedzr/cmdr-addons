@@ -7,7 +7,13 @@ import (
 )
 
 func TestUnescape(t *testing.T) {
-	str := `id: fwd-http-mock-1
+	var str string
+	str = `"\u591A\u884C\u6587\u672C\n"`
+	str = UnescapeUnicode([]byte(str))
+	t.Logf("Result: %s", str)
+
+	str = `
+id: fwd-http-mock-1
 type: mock
 match: /api/mock-1
 to: {}
