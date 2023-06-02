@@ -1,6 +1,6 @@
 module github.com/hedzr/cmdr-addons
 
-go 1.17
+go 1.20
 
 //replace github.com/hedzr/log => ../10.log
 
@@ -14,10 +14,10 @@ require (
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/gin-gonic/gin v1.9.1
 	github.com/gorilla/mux v1.8.0
-	github.com/hedzr/cmdr v1.11.13
-	github.com/hedzr/log v1.6.9
+	github.com/hedzr/cmdr v1.11.17
+	github.com/hedzr/log v1.6.15
 	github.com/kardianos/service v1.2.2
-	github.com/labstack/echo-contrib v0.14.1
+	github.com/labstack/echo-contrib v0.15.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/labstack/gommon v0.4.0
 	golang.org/x/crypto v0.9.0
@@ -26,7 +26,7 @@ require (
 )
 
 require (
-	github.com/BurntSushi/toml v1.2.1 // indirect
+	github.com/BurntSushi/toml v1.3.0 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
@@ -38,8 +38,8 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/hedzr/cmdr-base v1.0.0 // indirect
-	github.com/hedzr/evendeep v0.4.3 // indirect
-	github.com/hedzr/logex v1.6.9 // indirect
+	github.com/hedzr/evendeep v0.4.7 // indirect
+	github.com/hedzr/logex v1.6.16 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
