@@ -37,12 +37,12 @@ github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
 github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
-github.com/hedzr/cmdr v1.11.17 h1:Zx0wAbckSqyIggcKkJaDYWpL3E5hH5WW1xpjxpK3wgc=
-github.com/hedzr/cmdr v1.11.17/go.mod h1:A6YuTaVjp0WFbUnjoO97uVqM4pmd9+Yyr7e5LKezM1w=
+github.com/hedzr/cmdr v1.11.18 h1:MqWErif+LLinsjreWJxE/yZXKq/8qVwyeMkSkI2FgP0=
+github.com/hedzr/cmdr v1.11.18/go.mod h1:7SjcLdM8mOpDZAsKi/Bqmdi2MheSrTRCUInbMdsWm40=
 github.com/hedzr/cmdr-base v1.0.0 h1:6KY06e54o4mAkGf5MAHlCAuwH0X1xGIR6Hb+BjEfs1o=
 github.com/hedzr/cmdr-base v1.0.0/go.mod h1:c3vMkHa5PME2P2W8lE3T9+JX12tq9tmCUt6lXbmt5kI=
-github.com/hedzr/evendeep v0.4.7 h1:CMQ7UtJjyHtBhkzPsuhdKG5HsmH72RjTs+ohGLGSJ0M=
-github.com/hedzr/evendeep v0.4.7/go.mod h1:a5Thsi9jGBKJw1qJZ3767jNJe+52yhHVScszY1LTqfY=
+github.com/hedzr/evendeep v0.4.8 h1:Zhz2d4L7EWXRIqO2tcZYHAqoEevW9HXx3n4Z5JcDWxc=
+github.com/hedzr/evendeep v0.4.8/go.mod h1:a5Thsi9jGBKJw1qJZ3767jNJe+52yhHVScszY1LTqfY=
 github.com/hedzr/log v1.6.15 h1:AbjuPsEwpkP449/433tGY2JEove9irOxV8dhYC10+Jc=
 github.com/hedzr/log v1.6.15/go.mod h1:NHEKHHlG4dVXYlmmetB9IchN8obVEbOJRKOKQgT6DTM=
 github.com/hedzr/logex v1.6.16 h1:zAuph2Ojece78ioBOxKBLyzXqsVbpzMxuOvojyRXd/Q=

@@ -14,7 +14,7 @@ require (
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/gin-gonic/gin v1.9.1
 	github.com/gorilla/mux v1.8.0
-	github.com/hedzr/cmdr v1.11.17
+	github.com/hedzr/cmdr v1.11.18
 	github.com/hedzr/log v1.6.15
 	github.com/kardianos/service v1.2.2
 	github.com/labstack/echo-contrib v0.15.0
@@ -38,7 +38,7 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/hedzr/cmdr-base v1.0.0 // indirect
-	github.com/hedzr/evendeep v0.4.7 // indirect
+	github.com/hedzr/evendeep v0.4.8 // indirect
 	github.com/hedzr/logex v1.6.16 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
