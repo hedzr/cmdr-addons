@@ -11,6 +11,10 @@ see also [`cmdr`](https://github.com/hedzr/cmdr).
 
 ## Prerequisites
 
+### v1.11.17 and newer
+
+golang 1.20+ required
+
 ### v1.11.6 and newer
 
 golang 1.17+ required
