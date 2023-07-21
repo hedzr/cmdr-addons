@@ -1,0 +1,12 @@
+app:
+  bgo:
+    build:
+      os: [darwin]
+      arch: [amd64]
+      projects: {}
+      output:
+        dir: ./bin
+        named-as: '{{.AppName}}-{{.OS}}-{{.ARCH}}'
+      excludes: [study*, test*]
+
+
