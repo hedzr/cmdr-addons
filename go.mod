@@ -14,33 +14,33 @@ require (
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/gin-gonic/gin v1.9.1
 	github.com/gorilla/mux v1.8.0
-	github.com/hedzr/cmdr v1.11.20
-	github.com/hedzr/log v1.6.18
+	github.com/hedzr/cmdr v1.11.21
+	github.com/hedzr/log v1.6.21
 	github.com/kardianos/service v1.2.2
 	github.com/labstack/echo-contrib v0.15.0
-	github.com/labstack/echo/v4 v4.11.1
+	github.com/labstack/echo/v4 v4.11.2
 	github.com/labstack/gommon v0.4.0
 	golang.org/x/crypto v0.14.0
-	gopkg.in/hedzr/errors.v3 v3.1.6
+	gopkg.in/hedzr/errors.v3 v3.1.9
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
-	github.com/bytedance/sonic v1.10.1 // indirect
+	github.com/bytedance/sonic v1.10.2 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.14.0 // indirect
+	github.com/go-playground/validator/v10 v10.15.5 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/hedzr/cmdr-base v1.0.0 // indirect
-	github.com/hedzr/evendeep v0.4.8 // indirect
-	github.com/hedzr/logex v1.6.19 // indirect
+	github.com/hedzr/evendeep v0.4.13 // indirect
+	github.com/hedzr/logex v1.6.21 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
@@ -69,5 +69,6 @@ require (
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 )
