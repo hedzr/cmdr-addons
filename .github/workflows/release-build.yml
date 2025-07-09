@@ -52,9 +52,9 @@ jobs:
           # body_path: relnotes.md
           body: |
             This release was created by: ${{ github.event.sender.login }}
-            Release of Cmdr-CLI tool, built from commit ${{ env.SHORT_SHA }}, is now available.
+            Release of Cmdr-Addons, built from commit ${{ env.SHORT_SHA }}, is now available.
           files: |
-            ./cmdr-*.*
+            *.zip
           # # body: |
           # #   ${{ steps.read_release.outputs.RELEASE_BODY }}
           # body: |
