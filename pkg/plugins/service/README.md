@@ -1,7 +1,0 @@
-# TODO
-
-> service will install / un-install, start / stop, and run a program 
-> as a service (daemon). Currently supports Windows XP+, 
-> Linux/(systemd | Upstart | SysV), and OSX/Launchd.
-
-
