@@ -1,88 +1,29 @@
-# cmdr-addons: Addons for `cmdr`
+# Addons for cmdr/v2
 
 ![Go](https://github.com/hedzr/cmdr-addons/workflows/Go/badge.svg)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/hedzr/cmdr-addons)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/hedzr/cmdr-addons.svg?label=release)](https://github.com/hedzr/cmdr-addons/releases)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhedzr%2Fcmdr-addons.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhedzr%2Fcmdr-addons?ref=badge_shield)
 
-see also [`cmdr`](https://github.com/hedzr/cmdr).
+This is an addons repo especially for [cmdr/v2](https://github.com/hedzr/cmdr).
 
-> **NOTE**  
-> The `cmdr-addons` version is following `cmdr`'s now.
+The typical app is [cmdr-addons/examples/myservice](https://github.com/hedzr/cmdr-addons/blob/master/examples/myservice).
 
-## Prerequisites
+![image-20241111141228632](https://cdn.jsdelivr.net/gh/hzimg/blog-pics@master/upgit/2024/11/20241111_1731305562.png)
 
-### v1.11.17 and newer
-
-golang 1.20+ required
-
-### v1.11.6 and newer
-
-golang 1.17+ required
-
-> The constraints are from updating via go modules.
-
-### v1.9.8-p3 and newer
-
-golang 1.15+ required.
-
-> **Causes**:  
-> 1. golang.org/x/net/http2 used errors.Is()
-> 2. golang.org/x/net/http2 used os.ErrDeadlineExceeded
-
-Updates:
-1. removed iris/v12 [`import "github.com/hedzr/cmdr-addons v1.9.8-p3"`]
-2. seems ci not good for go1.14
-
-### v1.9.7 and older
-
-golang 1.13+ required.
-
-> **Causes**:  
->   github.com/kataras/iris/v12@v12.1.8/core/errgroup/errgroup.go:109:9: undefined: errors.Unwrap
->
-> **Workaround**:  
->   Avoid using `iris` codes in `svr` templates.
-
-## Includes:
-
-### Plugins
-
-#### `dex`
-
-- new version of `daemon` plugin: `dex`
-
-- sample app:
-  For examples, see also: [the example app: service](https://github.com/hedzr/cmdr-examples/tree/master/examples/service)
-
-#### `svr`
-
-The wrapped http2 server with multiple 3rd multiplexers (echo, gin, ...).
-
-sample app:
-
-[the example app: service](https://github.com/hedzr/cmdr-examples/tree/master/examples/service)
-
-#### `trace`
-- `trace`: adds `--trace` to your root command
+A tiny app using `cmdr/v2` and `cmdr-addons` is:
 
 ```go
-TODO
+//
 ```
 
-### Others
+See also:
 
-- `svr`: template codes for http/2 server (mux)
-- `vxconf`: helpers
+- [cmdr/v2](https://github.com/hedzr/cmdr)
 
-## Thanks to JODL
+## History
 
-[JODL (JetBrains OpenSource Development License)](https://www.jetbrains.com/community/opensource/) is good:
-
-[![goland](https://gist.githubusercontent.com/hedzr/447849cb44138885e75fe46f1e35b4a0/raw/ca8ac2694906f5650d585263dbabfda52072f707/logo-goland.svg)](https://www.jetbrains.com/?from=hedzr/cmdr-addons)
-[![jetbrains](https://gist.githubusercontent.com/hedzr/447849cb44138885e75fe46f1e35b4a0/raw/bedfe6923510405ade4c034c5c5085487532dee4/jetbrains-variant-4.svg)](https://www.jetbrains.com/?from=hedzr/cmdr-addons)
+See full list in [CHANGELOG](https://github.com/hedzr/cmdr-addons/blob/master/CHANGELOG)
 
 ## License
 
-MIT
-
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhedzr%2Fcmdr-addons.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhedzr%2Fcmdr-addons?ref=badge_large)
+Apache 2.0
