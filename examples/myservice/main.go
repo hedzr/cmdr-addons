@@ -16,8 +16,13 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("expected 'foo' or 'bar' subcommands")
-		os.Exit(1)
+		fmt.Print(`myservice - (c) Copyright by cmdr-addons Authors
+
+Commands: start|stop|restart|install|uninstall
+
+`)
+		// os.Exit(1)
+		return
 	}
 
 	switch os.Args[1] {
