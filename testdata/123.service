@@ -1,0 +1,59 @@
+### 123 Tool services
+### 123.service
+### executable: /bin/sh
+
+[Unit]
+Description=123 Tool Service for %i - 123 desc
+# Documentation=man:sshd(8) man:sshd_config(5) man:123(1)
+After=network.target
+# Wants=syslog.service
+ConditionPathExists=/bin/sh
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+#Type=idle
+Type=forking
+User=%i
+#Group=%i
+LimitNOFILE=65535
+
+KillMode=process
+Restart=on-failure
+RestartSec=23s
+# RestartLimitIntervalSec=60
+
+EnvironmentFile=/etc/default/123
+WorkingDirectory=%h
+#          start: --addr, --port,
+#           todo: --pid
+# global options: --verbose, --debug,
+ExecStart=/bin/sh $GLOBAL_OPTIONS server start --foreground --service $OPTIONS
+#           stop: -1/--hup, -9/--kill,
+### TODO ExecStop=/bin/sh $GLOBAL_OPTIONS server stop -1
+### TODO ExecReload=/bin/kill -HUP $MAINPID
+ExecStop=/bin/sh $GLOBAL_OPTIONS server stop -3
+ExecReload=/bin/sh $GLOBAL_OPTIONS server restart
+
+# # make sure log directory exists and owned by syslog
+PermissionsStartOnly=true
+ExecStartPre=-/bin/mkdir /var/run/123
+ExecStartPre=-/bin/mkdir /var/lib/123
+ExecStartPre=-/bin/mkdir /var/log/123
+ExecStartPre=-/bin/chown -R %i: /var/run/123 /var/lib/123
+# ExecStartPre=-/bin/chown -R syslog:adm /var/log/123
+ExecStartPre=-/bin/chown -R %i: /var/log/123
+
+# # enable coredump
+# ExecStartPre=ulimit -c unlimited
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=123
+
+
+
+
+
+
