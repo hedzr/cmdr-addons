@@ -1,4 +1,4 @@
-module github.com/hedzr/cmdr-addons/v2/service
+module github.com/hedzr/cmdr-addons/v2/service/v2/v2
 
 go 1.23.0
 

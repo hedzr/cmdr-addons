@@ -16,7 +16,7 @@ import (
 	"github.com/hedzr/is/exec"
 	"gopkg.in/hedzr/errors.v3"
 
-	"github.com/hedzr/cmdr-addons/v2/service/systems"
+	"github.com/hedzr/cmdr-addons/v2/service/v2/systems"
 	"github.com/hedzr/cmdr-addons/v2/tool/dbglog"
 	logz "github.com/hedzr/logg/slog"
 )

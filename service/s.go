@@ -9,7 +9,7 @@ import (
 
 	"github.com/hedzr/cmdr-addons/v2/tool/dbglog"
 
-	"github.com/hedzr/cmdr-addons/v2/service/systems"
+	"github.com/hedzr/cmdr-addons/v2/service/v2/systems"
 )
 
 // New creates an instance of service Manager, so that you can run it or manage it.

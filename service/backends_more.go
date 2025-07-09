@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hedzr/cmdr-addons/v2/service/systems"
+	"github.com/hedzr/cmdr-addons/v2/service/v2/systems"
 )
 
 type upstartD struct{}
