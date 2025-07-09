@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/hedzr/cmdr-addons/v2/service/filelock"
+	"github.com/hedzr/cmdr-addons/v2/service/v2/filelock"
 )
 
 func ExampleFlock_Locked() {

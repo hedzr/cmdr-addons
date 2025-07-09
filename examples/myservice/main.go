@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/hedzr/cmdr-addons/v2/service"
+	"github.com/hedzr/cmdr-addons/v2/service/v2"
 	"github.com/hedzr/cmdr-addons/v2/tool/dbglog"
 	"github.com/hedzr/is"
 	"github.com/hedzr/is/basics"
