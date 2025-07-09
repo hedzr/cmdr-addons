@@ -201,7 +201,7 @@ type wrS struct{ logzorig.Logger }
 
 func (s *wrS) Write(data []byte) (n int, err error) {
 	ctx := context.Background()
-	s.Logger.Logit(ctx, logzorig.InfoLevel, string(data))
+	s.Logit(ctx, logzorig.InfoLevel, string(data))
 	return
 }
 
