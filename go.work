@@ -3,5 +3,5 @@ go 1.23.3
 use (
 	.
 	./examples
-	./pkg/service
+	./service
 )
