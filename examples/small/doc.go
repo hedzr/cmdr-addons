@@ -2,6 +2,6 @@ package main
 
 const AppNameExample = "small" // appName for the current demo app
 
-const appName = "cmdr-loaders" // appName of hedzr/cmdr-loaders package
-const version = "v2.0.5"       // version of hedzr/cmdr-loaders package | update it while bumping hedzr/cmdr-loaders' version
+const appName = "cmdr-addons" // appName of hedzr/cmdr-loaders package
+const version = "v2.0.6"      // version of hedzr/cmdr-loaders package | update it while bumping hedzr/cmdr-loaders' version
 const Version = version
