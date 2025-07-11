@@ -1,6 +1,6 @@
 # Addons for cmdr/v2
 
-![Go](https://github.com/hedzr/cmdr-addons/workflows/Go/badge.svg)
+![Go](https://github.com/hedzr/cmdr-addons/workflows/release-build/badge.svg)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/hedzr/cmdr-addons)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/hedzr/cmdr-addons.svg?label=release)](https://github.com/hedzr/cmdr-addons/releases)
 
