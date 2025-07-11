@@ -7,6 +7,15 @@ $(V).SILENT:
 # SUB_APPS        ?= cmdr-cli loop
 # MAIN_ENTRY_FILE ?= .                 # Or: "main.go"
 
+# NAME           := blueprint
+# PACKAGE_NAME   := github.com/hedzr/cmdr/v2
+# ENTRY_PKG      := ./examples/blueprint
+
+# PLATFORM       ?= linux
+# ARCH           ?= amd64
+# BUILD_DIR      ?= bin
+# LOGS_DIR       ?= ./logs
+
 -include ./ci/mk/env.mk
 -include ./ci/mk/cc.mk
 -include ./ci/mk/git.mk
@@ -14,40 +23,9 @@ $(V).SILENT:
 -include .env
 -include .env.local
 
+-include ./ci/mk/vars.mk
 
-NAME           := myservice
-PACKAGE_NAME   := github.com/hedzr/cmdr-addons
-ENTRY_PKG      := ./examples/myservice
-
-PLATFORM       := linux
-ARCH           := amd64
-BUILD_DIR      := bin
-LOGS_DIR       := ./logs
-
-GO             := $(shell which go)
-GOOS           := $(shell go env GOOS)
-GOARCH         := $(shell go env GOARCH)
-GOPROXY        := $(shell go env GOPROXY)
-GOVERSION      := $(shell go version)
-DEFAULT_TARGET := $(GOOS)-$(GOARCH)
-W_PKG          := github.com/hedzr/cmdr/v2/conf
-CMDR_SETTING   := \
-	-X '$(W_PKG).Buildstamp=$(TIMESTAMP)' \
-	-X '$(W_PKG).Githash=$(GIT_REVISION)' \
-	-X '$(W_PKG).GitSummary=$(GIT_SUMMARY)' \
-	-X '$(W_PKG).GitDesc=$(GIT_DESC)' \
-	-X '$(W_PKG).BuilderComments=$(BUILDER_COMMENT)' \
-	-X '$(W_PKG).GoVersion=$(GOVERSION)' \
-	-X '$(W_PKG).Version=$(GIT_VERSION)' \
-	-X '$(W_PKG).AppName=$(NAME)'
-GOBUILD := CGO_ENABLED=0 \
-	$(GO) build \
-	-tags "cmdr hzstudio sec antonal" \
-	-trimpath \
-	-ldflags="-s -w $(CMDR_SETTING)" \
-	-o $(BUILD_DIR)
-
-.PHONY: all $(BUILD_DIR)/$(NAME) release release-all test build
+.PHONY: all $(BUILD_DIR)/$(NAME) release release-all test build primary-target main
 all: build
 normal: clean $(BUILD_DIR)/$(NAME)
 
@@ -78,10 +56,10 @@ build: $(BUILD_DIR)/$(NAME)
 build-default: $(DEFAULT_TARGET)
 	@echo BUILD OK
 
-# myservice: build executable for current GOOS & GOARCH
-myservice: my-service
-# my-service: build executable for the TARGET GOOS & GOARCH (see also PLATFORM & ARCH vars)
-my-service:
+# primary-target: build executable for current GOOS & GOARCH
+primary-target: main
+# main: build executable for the TARGET GOOS & GOARCH (see also PLATFORM & ARCH vars)
+main:
 	@-$(MAKE) $(BUILD_DIR)/$(NAME) GOOS=$(PLATFORM) GOARCH=$(ARCH) 
 
 # bin/cmdr is the default executable for running under your current GOOS & GOARCH.
