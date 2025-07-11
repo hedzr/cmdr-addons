@@ -19,6 +19,39 @@ APPS=(small)
 
 # LDFLAGS = -s -w -X 'github.com/hedzr/cmdr/v2/conf.Buildstamp=2024-10-25T18:09:06+08:00' -X 'github.com/hedzr/cmdr/v2/conf.GIT_HASH=580ca50' -X 'github.com/hedzr/cmdr/v2/conf.GitSummary=580ca50-dirty' -X 'github.com/hedzr/cmdr/v2/conf.GitDesc=580ca50 upgrade deps' -X 'github.com/hedzr/cmdr/v2/conf.BuilderComments=' -X 'github.com/hedzr/cmdr/v2/conf.GoVersion=go version go1.23.7 darwin/arm64' -X 'github.com/hedzr/cmdr/v2/conf.Version=0.5.1'
 
+sync() {
+	alias cp-sync='cp -R -P -p -c -n -X '
+	# --exclude=._*
+	# rsync --progress --exclude .DS_Store --exclude '._.*' -avrztopg /Volumes/Install\ macOS\ Sonoma/w ~/Downloads/BF/
+	alias rsync-any="rsync -avz -rtopg --partial --force --progress -8 --stats --include='*' --include='.*' --exclude=.DS_Store --exclude '._.*' "
+	rsync-short() {
+		rsync -avz -rtopg --partial --force --progress -8 --stats --exclude=.DS_Store --exclude '._.*' --exclude=.Spotlight-V100 --exclude=.Trashes --exclude=Thumbs.db --exclude=.vitepress/cache/ --exclude=.vitepress/dist/ --exclude=ops/big/ --exclude='cmake-build-*/' --exclude=build/ --exclude=.cache/ --exclude=node_modules/ --exclude=.next/ --exclude=.vercel/ --exclude=.source/ --exclude=.pnpm-store/ --exclude=.venv/ --exclude=venv/ --exclude=.gradle --exclude=.run --exclude=.zig-cache/ --exclude=zig-out/ --exclude=target/ --exclude=.vscode-server/ --exclude=.oh-my-zsh/ --exclude=.local/share --exclude=.local/state "$@"
+	}
+	if [ -f ~/.config/rsync-codes.exclude.txt ]; then
+		alias rsync-codes="rsync -avz -rtopg --partial --force --progress -8 --stats --exclude-from=$HOME/.config/rsync-codes.exclude.txt "
+	else
+		alias rsync-codes=rsync-short
+	fi
+
+	tip "sync codes to ubuntu@orb ..."
+	rsync-short ../cmdr.addons ubuntu@orb:~/works/
+
+	tip "ssh & build on ubuntu@orb ..."
+	ssh ubuntu@orb "
+	cd ~/works/cmdr.addons
+	which zip >/dev/null || sudo apt-get install -y zip
+	make release
+	[ -x ./bin/myservice ] && sudo rm ./bin/myservice && echo "./bin/myservice erased"
+	[ -x ./bin/linux-arm64/myservice ] && cp -v ./bin/linux-arm64/myservice ./bin/
+	"
+	cat >/dev/null <<-EOF
+		[ -x ./bin/linux-arm64/myservice ] && cp ./bin/linux-arm64/myservice ./bin/
+		./bin/myservice install --force
+		./bin/myservice start
+		ps -ef|grep myservice|grep -v grep
+	EOF
+}
+
 extract-app-version() {
 	local DEFAULT_DOC_NAME="${DEFAULT_DOC_NAME:-${1:-slog/doc.go}}"
 	APPNAME="$(grep -E "appName[ \t]+=[ \t]+" ${DEFAULT_DOC_NAME} | grep -Eo "\\\".+\\\"")"
