@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hedzr/cmdr-addons/v2/service/v2/systems"
+	"github.com/hedzr/cmdr-addons/service/v2/systems"
 )
 
 type upstartD struct{}
@@ -38,8 +38,6 @@ func (s *upstartD) Control(ctx context.Context, config *Config, m *mgmtS, cmd Co
 
 //
 
-//
-
 type sysvInitD struct{}
 
 func (s *sysvInitD) Choose(ctx context.Context) (ok bool) {
@@ -61,6 +59,7 @@ func hasSysvInitD(ctx context.Context) bool {
 
 		var buf bytes.Buffer
 		_, err = buf.ReadFrom(f)
+		_ = err
 		contents := buf.String()
 
 		if strings.Trim(contents, " \r\n") == "init" {

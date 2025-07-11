@@ -164,12 +164,25 @@ func SetLevel(level logzorig.Level) {
 
 func GetLevel() logzorig.Level { return log.Level() }
 
+func SetColorMode(mode bool) {
+	if p := log.Parent(); p != nil {
+		p.SetColorMode(mode)
+	}
+
+	if mode == false {
+		log.SetJSONMode(true)
+	}
+	log.SetColorMode(mode)
+	ZLogger().SetColorMode(mode)
+}
+
 func SetJSONMode(mode bool) {
 	if p := log.Parent(); p != nil {
 		p.SetJSONMode(mode)
 	}
 
 	log.SetJSONMode(mode)
+	ZLogger().SetJSONMode(mode)
 	// // sync cmdr's internal logger to json mode
 	// cmdrlogz.SetJSONMode(mode)
 }
@@ -204,6 +217,14 @@ func (s *wrS) Write(data []byte) (n int, err error) {
 	s.Logit(ctx, logzorig.InfoLevel, string(data))
 	return
 }
+
+//
+
+//
+
+//
+
+//
 
 // WrappedLogger returns a reference to *slog.Logger which was
 // wrapped to hedzr/logg/slog.

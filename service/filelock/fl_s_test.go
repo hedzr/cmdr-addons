@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/hedzr/cmdr-addons/v2/service/v2/filelock"
+	"github.com/hedzr/cmdr-addons/service/v2/filelock"
 )
 
 type TestSuite struct {

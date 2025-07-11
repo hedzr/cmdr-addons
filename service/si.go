@@ -81,6 +81,10 @@ type Config struct {
 
 	// Translate allows formatting msg with your own translator.
 	Translate func(string) string
+
+	ExecStartArgs  string
+	ExecStopArgs   string
+	PositionalArgs []string
 }
 
 type Chooser interface {

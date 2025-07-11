@@ -20,7 +20,7 @@ import (
 
 	"gopkg.in/hedzr/errors.v3"
 
-	"github.com/hedzr/cmdr-addons/v2/service/v2/systems"
+	"github.com/hedzr/cmdr-addons/service/v2/systems"
 	"github.com/hedzr/cmdr-addons/v2/tool/dbglog"
 )
 
@@ -245,7 +245,7 @@ func ntserviceStart(ctx context.Context, config *Config, m *mgmtS, s *ntServiceD
 
 	if ntserviceIsRunning(ctx, config, m, s) == nil {
 		err = ErrServiceIsRunning
-		s.Logger.Error("service ran already", "err", err)
+		s.Logger.Errorf("service ran already, err: %v", err)
 		return
 	}
 

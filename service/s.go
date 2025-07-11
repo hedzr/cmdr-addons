@@ -9,7 +9,7 @@ import (
 
 	"github.com/hedzr/cmdr-addons/v2/tool/dbglog"
 
-	"github.com/hedzr/cmdr-addons/v2/service/v2/systems"
+	"github.com/hedzr/cmdr-addons/service/v2/systems"
 )
 
 // New creates an instance of service Manager, so that you can run it or manage it.
@@ -147,17 +147,21 @@ func (s *mgmtS) NotifyLoggerCreated(logger ZLogger) {
 			dbglog.RawLogger().AddErrorWriter(logger)
 		}
 	} else if logger != dbglog.ZLogger() {
-		dbglog.RawLogger().SetColorMode(false)
+		// dbglog.RawLogger().SetColorMode(false)
 		// dbglog.RawLogger().SetWriter(logger)
 		// dbglog.RawLogger().SetErrorWriter(logger)
 		dbglog.RawLogger().AddWriter(logger)
 		dbglog.RawLogger().AddErrorWriter(logger)
 	}
+	if s.serviceMode {
+		dbglog.SetColorMode(false)
+	}
+	dbglog.SetColorMode(false)
 }
 
 func (s *mgmtS) NotifyLoggerDestroying(logger ZLogger) {
 	dbglog.RawLogger().ResetWriters()
-	dbglog.RawLogger().SetColorMode(s.colorModeSave)
+	dbglog.SetColorMode(s.colorModeSave)
 }
 
 type NotifyLogger interface {

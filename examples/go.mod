@@ -6,11 +6,11 @@ toolchain go1.23.3
 
 replace github.com/hedzr/cmdr-addons/v2 => ../
 
-replace github.com/hedzr/cmdr-addons/v2/service/v2 => ../service
+replace github.com/hedzr/cmdr-addons/service/v2 => ../service
 
 require (
 	github.com/hedzr/cmdr-addons/v2 v2.0.3
-	github.com/hedzr/cmdr-addons/v2/service/v2 v2.0.3
+	github.com/hedzr/cmdr-addons/service/v2 v2.0.3
 	github.com/hedzr/cmdr-loaders v1.3.39
 	github.com/hedzr/cmdr/v2 v2.1.39
 	github.com/hedzr/is v0.8.39

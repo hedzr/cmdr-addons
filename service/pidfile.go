@@ -10,7 +10,7 @@ import (
 	"github.com/hedzr/is"
 	"github.com/hedzr/is/dir"
 
-	"github.com/hedzr/cmdr-addons/v2/service/v2/filelock"
+	"github.com/hedzr/cmdr-addons/service/v2/filelock"
 	"github.com/hedzr/cmdr-addons/v2/tool/dbglog"
 )
 

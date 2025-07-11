@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 
-	"github.com/hedzr/cmdr-addons/v2/service/v2"
+	"github.com/hedzr/cmdr-addons/service/v2"
 	"github.com/hedzr/cmdr-addons/v2/tool/dbglog"
 	"github.com/hedzr/is"
 	"github.com/hedzr/is/basics"
@@ -64,7 +65,8 @@ func serverOper(ctx context.Context, cmd string, args []string) (err error) {
 
 		cfg := newConfig()
 		svc := newService(ctx1)
-		svc.SetServiceMode(true)
+		svc.SetServiceMode(svcmode)
+		svc.SetForegroundMode(foremode)
 		// err = svc.Control(ctx1, cfg, service.Start)
 
 		// closeChan := make(chan struct{}, 8)
@@ -108,7 +110,10 @@ func serverOper(ctx context.Context, cmd string, args []string) (err error) {
 }
 
 func serviceOper(ctx context.Context, c *flag.FlagSet, args []string, cmd service.Command, foreMode, serviceMode bool) (err error) {
-	c.Parse(args)
+	err = c.Parse(args)
+	if err != nil {
+		return
+	}
 
 	if debug {
 		is.SetDebugMode(true)
@@ -119,23 +124,37 @@ func serviceOper(ctx context.Context, c *flag.FlagSet, args []string, cmd servic
 	if force {
 		svc.SetForceMode(force)
 	}
+	if foremode {
+		foreMode = foremode
+	}
+	if svcmode {
+		serviceMode = svcmode
+	}
 	svc.SetForegroundMode(foreMode)
 	svc.SetServiceMode(serviceMode)
+
+	cfg.PositionalArgs = flag.Args()
+
 	err = svc.Control(ctx, cfg, cmd)
 	return
 }
 
 func newConfig() (cfg *service.Config) {
 	cfg = &service.Config{
-		Name:        "myservice",
-		DisplayName: "myservice service",
-		Description: "myservice service desc here",
+		Name:           "myservice",
+		DisplayName:    "myservice service",
+		Description:    "myservice service desc here",
+		ForceReinstall: force,
 		// WorkDir:        "",
 		// Executable:     "",
 		// ArgsForInstall: nil,
 		// Env:            nil,
 		// RunAs:          "",
 		// Dependencies:   nil,
+	}
+	if runtime.GOOS == "linux" {
+		cfg.ExecStartArgs = "start -foreground -service"
+		cfg.ExecStopArgs = "stop -3"
 	}
 	return
 }
@@ -159,8 +178,10 @@ var (
 	fooName   *string
 	barLevel  *int
 
-	debug bool
-	force bool
+	debug    bool
+	force    bool
+	foremode bool
+	svcmode  bool
 )
 
 func init() {
@@ -185,4 +206,9 @@ func init() {
 
 	installCmd.BoolVar(&force, "force", false, "force reinstall")
 	uninstallCmd.BoolVar(&force, "force", false, "force uninstall")
+
+	startCmd.BoolVar(&foremode, "foreground", false, "foreground mode")
+	startCmd.BoolVar(&svcmode, "service", false, "service mode")
+
+	stopCmd.BoolVar(&svcmode, "3", false, "signal #3")
 }

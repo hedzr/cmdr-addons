@@ -16,7 +16,7 @@ import (
 	"github.com/hedzr/is/exec"
 	"gopkg.in/hedzr/errors.v3"
 
-	"github.com/hedzr/cmdr-addons/v2/service/v2/systems"
+	"github.com/hedzr/cmdr-addons/service/v2/systems"
 	"github.com/hedzr/cmdr-addons/v2/tool/dbglog"
 	logz "github.com/hedzr/logg/slog"
 )
@@ -164,7 +164,7 @@ func launchdStart(ctx context.Context, config *Config, m *mgmtS, s *launchD) (er
 
 	if launchdIsRunning(ctx, config, m, s) == nil {
 		err = ErrServiceIsRunning
-		s.Logger.Error("service ran already", "err", err)
+		s.Logger.Errorf("service ran already, err: %v", err)
 		return
 	}
 
@@ -249,11 +249,13 @@ func enterLoop(ctx context.Context, config *Config, m *mgmtS, s *launchD) (err e
 			closer()
 		}()
 		dbglog.InfoContext(ctx, "entering loop", "service", config.ServiceName())
-		select {
-		case <-ctx.Done():
-			return
-		case <-closeChan:
-			return
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-closeChan:
+				return
+			}
 		}
 	})
 	// for {

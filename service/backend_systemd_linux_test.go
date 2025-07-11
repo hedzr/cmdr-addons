@@ -28,7 +28,7 @@ func TestServiceFile(t *testing.T) {
 
 		TempDir: os.TempDir(),
 	}
-	err := createServiceFile(ctx, config, file)
+	err := createServiceFile(ctx, config, file, "/etc/default")
 	if err != nil {
 		t.Fatal(err)
 	}

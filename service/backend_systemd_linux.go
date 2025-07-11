@@ -8,14 +8,19 @@ import (
 	"log/syslog"
 	"os"
 	"path"
+	"slices"
+	"strconv"
 	"strings"
+	"sync"
 	"text/template"
+	"time"
 
+	"github.com/hedzr/is"
 	"github.com/hedzr/is/dir"
 	cmdrexec "github.com/hedzr/is/exec"
 	"gopkg.in/hedzr/errors.v3"
 
-	"github.com/hedzr/cmdr-addons/v2/service/v2/systems"
+	"github.com/hedzr/cmdr-addons/service/v2/systems"
 	"github.com/hedzr/cmdr-addons/v2/tool/dbglog"
 )
 
@@ -86,11 +91,13 @@ func hasSystemd(ctx context.Context) bool {
 		var buf bytes.Buffer
 		_, err = buf.ReadFrom(f)
 		contents := buf.String()
+		_ = err
 
 		if strings.Trim(contents, " \r\n") == "systemd" {
 			return true
 		}
 	}
+	_ = ctx
 	return false
 }
 
@@ -98,6 +105,8 @@ func (s *systemD) initSyslogger(ctx context.Context, config *Config, m *mgmtS, c
 	if s.Logger != nil {
 		return
 	}
+
+	sn := config.ServiceName()
 
 	errsCh := make(chan error, 1)
 	go func() {
@@ -115,11 +124,11 @@ func (s *systemD) initSyslogger(ctx context.Context, config *Config, m *mgmtS, c
 			}
 		}
 	}()
-	if s.Logger, err = newSysLogger(config.ServiceName(), errsCh, syslog.LOG_INFO); err != nil {
+	if s.Logger, err = newSysLogger(sn, errsCh, syslog.LOG_INFO); err != nil {
 		return
 	}
 
-	err = s.Logger.Infof("\n\n-------------------- service %s: %s\n", config.ServiceName(), cmd)
+	err = s.Logger.Infof("\n\n-------------------- service %s: %s (service: %v) ----\n", sn, cmd, m.serviceMode)
 	m.NotifyLoggerCreated(s.Logger) // register syslog writer to our logz (logg/slog) containers
 	dbglog.OKContext(ctx, "a OKLevel message should be mapped as syslog's NOTICE message.")
 	return
@@ -180,17 +189,20 @@ func systemdStart(ctx context.Context, config *Config, m *mgmtS, s *systemD) (er
 		return errors.Unavailable
 	}
 
-	if systemdIsRunning(ctx, config, m, s) == nil {
-		err = ErrServiceIsRunning
-		s.Logger.Error("service ran already", "err", err)
-		return
-	}
-
 	_ = s.Logger.Infof("command-line is %q\n", config.CmdLines)
 	// s.Logger.Infof("store is:\n%s\n", cmdr.Store().Dump())
 	_ = s.Logger.Infof("fore: %v, sMode: %v\n", m.fore, m.serviceMode)
 	// cs := cmdr.Store().WithPrefix("server.start")
 	// _ = s.Logger.Infof("fore: %v, sMode: %v, user: %v", cs.MustBool("foreground"), cs.MustBool("service"), cs.MustBool("user"))
+
+	if text, e := systemdIsActive(config); e != nil ||
+		slices.Contains([]string{"active", "activated"}, text) {
+		if m.serviceMode == false {
+			err = ErrServiceIsRunning
+			s.Logger.Errorf("service ran already, text: %q, err: %v", text, err)
+			return
+		}
+	}
 
 	// call into Entity.Start if exists
 	if fn, ok := config.Entity.(EntityStartAware); ok {
@@ -203,9 +215,13 @@ func systemdStart(ctx context.Context, config *Config, m *mgmtS, s *systemD) (er
 		if prog, ok := config.Entity.(RunnableService); ok {
 			prog.SetServiceMode(m.serviceMode)
 			_ = s.Logger.Infof("run program...\n")
+			println("run program...")
 			err = prog.Run(ctx, config, s.Logger)
+			if err != nil {
+				return
+			}
 		}
-		return
+		return enterLoop(ctx, config, m, s)
 	}
 
 	// or, call systemd command to trigger the real serivce starting
@@ -227,6 +243,54 @@ func systemdStart(ctx context.Context, config *Config, m *mgmtS, s *systemD) (er
 	return
 }
 
+func enterLoop(ctx context.Context, config *Config, m *mgmtS, s *systemD) (err error) {
+	closeChan := make(chan struct{}, 8)
+	defer func() { close(closeChan) }()
+
+	pid, ppid := os.Getpid(), os.Getppid()
+
+	catcher := is.Signals().Catch()
+	catcher.WithOnSignalCaught(func(ctx context.Context, sig os.Signal, wgShutdown *sync.WaitGroup) {
+		println()
+		fmt.Printf("signal %q caught...\n", sig)
+		closeChan <- struct{}{}
+	}).WaitFor(ctx, func(ctx context.Context, closer func()) {
+		ticker := time.NewTicker(10 * time.Second)
+		defer func() {
+			ticker.Stop()
+			dbglog.InfoContext(ctx, "stop systemd service", "pid", pid, "ppid", ppid, "service", config.ServiceName())
+			err = systemdStop(ctx, config, m, s)
+			if err != nil {
+				dbglog.ErrorContext(ctx, "stop systemd service failed", "pid", pid, "ppid", ppid, "service", config.ServiceName(), "err", err)
+			}
+			closer()
+		}()
+		dbglog.InfoContext(ctx, "entering loop", "service", config.ServiceName())
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-closeChan:
+				return
+			case tick := <-ticker.C:
+				dbglog.InfoContext(ctx, "(service.ticker) tick", "tick", tick)
+			}
+		}
+	})
+	// for {
+	// 	select {
+	// 	case <-ctx.Done():
+	// 		dbglog.InfoContext(ctx, "stop systemd service", "pid", pid, "ppid", ppid, "service", config.ServiceName())
+	// 		err = systemdStop(ctx, config, m, s)
+	// 		if err != nil {
+	// 			dbglog.ErrorContext(ctx, "stop systemd service failed", "pid", pid, "ppid", ppid, "service", config.ServiceName(), "err", err)
+	// 		}
+	// 		return
+	// 	}
+	// }
+	return
+}
+
 func systemdStop(ctx context.Context, config *Config, m *mgmtS, s *systemD) (err error) {
 	if fn, ok := config.Entity.(EntityStopAware); ok {
 		return fn.Stop(ctx, config, s.Logger)
@@ -239,11 +303,34 @@ func systemdStop(ctx context.Context, config *Config, m *mgmtS, s *systemD) (err
 
 	var retCode int
 	var msg string
+
+	if len(config.PositionalArgs) > 0 {
+		t := config.PositionalArgs[len(config.PositionalArgs)-1]
+		mainpid, err1 := strconv.Atoi(t)
+		if err1 != nil {
+			mainpid = 0
+		}
+		if mainpid > 0 {
+			retCode, msg, err = cmdrexec.Sudo("kill", "-3", t)
+			if err != nil || retCode != 0 {
+				err = errors.New("failed to stop service. The console outputs are:\n%v", msg).WithErrors(err)
+				return
+			}
+			println("The kill -3 signal sent to", t)
+			dbglog.InfoContext(ctx, "The kill -3 signal sent to", "target-pid", mainpid)
+			return
+		}
+	}
+
 	retCode, msg, err = cmdrexec.Sudo("systemctl", "stop", config.ServiceName())
 	if err != nil || retCode != 0 {
 		err = errors.New("failed to stop service. The console outputs are:\n%v", msg).WithErrors(err)
 		return
 	}
+
+	pid, ppid := os.Getpid(), os.Getppid()
+	dbglog.DebugContext(ctx, "'sudo systemctl stop service' ends.", "pid", pid, "ppid", ppid, "service", config.ServiceName())
+	_ = s.Logger.Infof("systemctl stop %s done: pid=%v, ppid=%v\n", config.ServiceName(), pid, ppid)
 
 	return
 }
@@ -309,9 +396,11 @@ func systemdIsActive(config *Config) (text string, err error) {
 func systemdIsRunning(ctx context.Context, config *Config, m *mgmtS, s *systemD) (err error) {
 	var text string
 	text, err = systemdIsActive(config)
-	if text != "activating" && text != "activated" {
+	// text != "activating" &&
+	if text != "activated" && text != "active" {
 		err = ErrServiceIsNotRunning
 	}
+	_, _, _ = ctx, m, s
 	return
 }
 
@@ -321,6 +410,7 @@ func systemdIsInactive(ctx context.Context, config *Config, m *mgmtS, s *systemD
 	if text != "inactive" {
 		err = errors.New("service is not inactive")
 	}
+	_, _, _ = ctx, m, s
 	return
 }
 
@@ -330,6 +420,7 @@ func systemdIsStarted(ctx context.Context, config *Config, m *mgmtS, s *systemD)
 	if text != "activating" {
 		err = errors.New("service is not running")
 	}
+	_, _, _ = ctx, m, s
 	return
 }
 
@@ -343,16 +434,19 @@ func systemdIsEnabled(ctx context.Context, config *Config, m *mgmtS, s *systemD)
 	if strings.Trim(text, " \t\r\n") != "enabled" {
 		err = ErrServiceIsNotEnabled
 	}
+	_, _, _ = ctx, m, s
 	return
 }
 
 func systemdGetStatus(ctx context.Context, config *Config, m *mgmtS, s *systemD) (err error) {
+	_, _, _ = ctx, m, s
+	_ = config
 	return
 }
 
-func createServiceFile(ctx context.Context, config *Config, svcfile string) (err error) {
+func createServiceFile(ctx context.Context, config *Config, svcfile, defaultDir string) (err error) {
 	var tmpl *template.Template
-	tmplFile := fmt.Sprintf("%v/share/service.tpl", config.TemplateDir)
+	tmplFile := path.Join(config.TemplateDir, "share", "service.tpl")
 	if dir.FileExists(tmplFile) {
 		tmpl, err = template.New("service.file").ParseFiles(tmplFile)
 	} else {
@@ -361,9 +455,10 @@ func createServiceFile(ctx context.Context, config *Config, svcfile string) (err
 	if err != nil {
 		return
 	}
+	_, _, _ = ctx, config, svcfile
 
 	var of *os.File
-	tmpFile := fmt.Sprintf("%v/%v", config.TempDir, config.ServiceName())
+	tmpFile := path.Join(config.TempDir, config.ServiceName())
 	if err = dir.EnsureDir(path.Dir(tmpFile)); err != nil {
 		return
 	}
@@ -375,21 +470,34 @@ func createServiceFile(ctx context.Context, config *Config, svcfile string) (err
 		config.Type = "exec"
 	}
 
+	var execStartCmd, execStopCmd string
+	if config.ExecStartArgs != "" {
+		execStartCmd = fmt.Sprintf("%v $GLOBAL_OPTIONS %v $OPTIONS", config.ExecutablePath(), config.ExecStartArgs)
+	}
+	if config.ExecStopArgs != "" {
+		execStopCmd = fmt.Sprintf("%v $GLOBAL_OPTIONS %v $OPTIONS $MAINPID", config.ExecutablePath(), config.ExecStopArgs)
+	}
+
 	defer func() {
 		of.Close()
+		_, _, err = cmdrexec.Sudo("bash", "-c", fmt.Sprintf("mv %v %v", tmpFile, svcfile))
 		dir.DeleteFile(tmpFile)
 	}()
-	if err = tmpl.Execute(of, config); err != nil {
+	if err = tmpl.Execute(of, struct {
+		*Config
+		DefaultDir   string
+		ExecStartCmd string
+		ExecStopCmd  string
+	}{config, defaultDir, execStartCmd, execStopCmd}); err != nil {
 		return
 	}
 
-	_, _, err = cmdrexec.Sudo("mv", tmpFile, svcfile)
 	return
 }
 
-func createDefaultFile(ctx context.Context, config *Config, svcfile string) (err error) {
+func createDefaultFile(ctx context.Context, config *Config, file string) (err error) {
 	var tmpl *template.Template
-	tmplFile := fmt.Sprintf("%v/share/default.tpl", config.TemplateDir)
+	tmplFile := path.Join(config.TemplateDir, "share", "default.tpl")
 	if dir.FileExists(tmplFile) {
 		tmpl, err = template.New("service.file").ParseFiles(tmplFile)
 	} else {
@@ -398,25 +506,31 @@ func createDefaultFile(ctx context.Context, config *Config, svcfile string) (err
 	if err != nil {
 		return
 	}
+	_, _, _ = ctx, config, file
 
 	var of *os.File
-	tmpFile := fmt.Sprintf("%v/%v", config.TempDir, config.ServiceName())
+	tmpFile := path.Join(config.TempDir, config.ServiceBareName())
 	if err = dir.EnsureDir(path.Dir(tmpFile)); err != nil {
 		return
 	}
 	if of, err = os.Create(tmpFile); err != nil {
 		return
 	}
+	// println(tmpFile, "created")
 
 	defer func() {
 		of.Close()
+		cmd := fmt.Sprintf("ls -la %v && mv %v %v && ls -la %v", tmpFile, tmpFile, file, file)
+		_, msg, _ := cmdrexec.Sudo("bash", "-c", cmd)
+		println(file, "created by", strconv.Quote(cmd))
+		// println(msg)
+		_ = msg
 		dir.DeleteFile(tmpFile)
 	}()
 	if err = tmpl.Execute(of, config); err != nil {
 		return
 	}
 
-	cmdrexec.Sudo("mv", tmpFile, svcfile)
 	return
 }
 
@@ -430,14 +544,23 @@ func systemdInstall(ctx context.Context, config *Config, m *mgmtS, s *systemD) (
 	}
 
 	if systemdIsRunning(ctx, config, m, s) == nil {
-		s.Logger.Infof("service was running, or installed.")
-		return
+		if !config.ForceReinstall {
+			s.Logger.Infof("service was running, or installed.")
+			return
+		}
 	}
 
 	// cmdstore := cmdr.Store()
 	// forceReinstall := cmdstore.MustBool("server.install.force")
 
-	file := fmt.Sprintf("%s/%s", systemdDir, config.ServiceName())
+	var defdir string
+	for _, defdir = range []string{defaultsDir, "/etc/default"} {
+		if dir.FileExists(defdir) {
+			break
+		}
+	}
+
+	file := path.Join(systemdDir, config.ServiceName())
 	if dir.FileExists(file) {
 		if !config.ForceReinstall {
 			msg := `Service had been installed already.
@@ -456,15 +579,16 @@ If you wanna reinstall it, try this command line:
 		}
 	}
 
-	err = createServiceFile(ctx, config, file)
+	err = createServiceFile(ctx, config, file, defdir)
 	if err != nil {
 		return
 	}
 
-	file = fmt.Sprintf("%s/%s", defaultsDir, config.Name)
+	// env file
+	file = path.Join(defdir, config.ServiceBareName())
 	fileExist := dir.FileExists(file)
 	if fileExist && !config.ForceReinstall {
-		//
+		// //
 	} else {
 		err = createDefaultFile(ctx, config, file)
 		if err != nil {
@@ -483,13 +607,23 @@ If you wanna reinstall it, try this command line:
 		return
 	}
 
+	// // env file
+	// envfile := "/etc/sysconfig/" + config.ServiceName()
+	// retCode, msg, err = cmdrexec.Sudo("touch", envfile)
+	// if err != nil || retCode != 0 {
+	// 	err = errors.New("failed to touch env file %q. The console outputs are:\n%v", envfile, msg).WithErrors(err)
+	// 	return
+	// } else {
+	// 	println(envfile, "created")
+	// }
+
 	if autoEnable := config.AutoEnable; autoEnable {
 		err = systemdEnable(ctx, config, m, s)
 	}
 
 	if err == nil {
-		println("Service created successfully.")
 		s.Logger.Infof("Service created successfully.\n")
+		println("Service created successfully.")
 	}
 	return
 }
@@ -552,6 +686,19 @@ func systemdUninstall(ctx context.Context, config *Config, m *mgmtS, s *systemD)
 	retCode, _, err = cmdrexec.Sudo("systemctl", "daemon-reload")
 	if err != nil || retCode != 0 {
 		return
+	}
+
+	// env file
+	envfile := "/etc/sysconfig/" + config.ServiceName()
+	if dir.FileExists(envfile) {
+		var msg string
+		retCode, msg, err = cmdrexec.Sudo("rm", envfile)
+		if err != nil || retCode != 0 {
+			err = errors.New("failed to delete env file %q. The console outputs are:\n%v", envfile, msg).WithErrors(err)
+			return
+		} else {
+			println(envfile, "erased")
+		}
 	}
 
 	println("service uninstalled")
@@ -661,7 +808,7 @@ Restart=on-failure
 {{if .RestartSec}}RestartSec={{.RestartSec}}{{else}}RestartSec=23s{{end}}
 # RestartLimitIntervalSec=60
 
-EnvironmentFile=/etc/sysconfig/{{.Name}}
+EnvironmentFile={{.DefaultDir}}/{{.Name}}
 {{range $k, $v := .Env -}}
 Environment={{$k}}={{$v}}
 {{end -}}
@@ -671,11 +818,11 @@ Environment={{$k}}={{$v}}
 #          start: --addr, --port,
 #           todo: --pid
 # global options: --verbose, --debug,
-ExecStart={{.ExecutablePath}} $GLOBAL_OPTIONS server start --foreground --service $OPTIONS
+{{if .ExecStartCmd}}ExecStart={{.ExecStartCmd}}{{else}}ExecStart={{.ExecutablePath}} $GLOBAL_OPTIONS server start -foreground -service $OPTIONS{{end}}
 #           stop: -1/--hup, -9/--kill,
 ### TODO ExecStop={{.ExecutablePath}} $GLOBAL_OPTIONS server stop -1
 ### TODO ExecReload=/bin/kill -HUP $MAINPID
-ExecStop={{.ExecutablePath}} $GLOBAL_OPTIONS server stop -3
+{{if .ExecStopCmd}}ExecStop={{.ExecStopCmd}}{{else}}ExecStop={{.ExecutablePath}} $GLOBAL_OPTIONS server stop -3 $MAINPID{{end}}
 ExecReload={{.ExecutablePath}} $GLOBAL_OPTIONS server restart
 
 # # make sure log directory exists and owned by syslog

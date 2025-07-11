@@ -1,10 +1,10 @@
-module github.com/hedzr/cmdr-addons/v2/service/v2
+module github.com/hedzr/cmdr-addons/service/v2
 
 go 1.23.0
 
 toolchain go1.23.3
 
-replace github.com/hedzr/cmdr-addons/v2 => ../
+replace github.com/hedzr/cmdr-addons => ../
 
 // replace github.com/hedzr/cmdr/v2 => ../cmdr
 

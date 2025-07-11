@@ -33,6 +33,14 @@ func (e *Config) ScreenName() string {
 }
 
 func (e *Config) ServiceName() string {
+	n := e.ServiceBareName()
+	if !strings.HasSuffix(n, ".service") {
+		n += ".service"
+	}
+	return n
+}
+
+func (e *Config) ServiceBareName() string {
 	n := e.Name
 	if n == "" {
 		n = e.DisplayName
@@ -41,9 +49,6 @@ func (e *Config) ServiceName() string {
 		if e.Entity != nil {
 			n = e.Entity.ServiceName()
 		}
-	}
-	if !strings.HasSuffix(n, ".service") {
-		n += ".service"
 	}
 	return n
 }
