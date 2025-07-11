@@ -169,7 +169,7 @@ func SetColorMode(mode bool) {
 		p.SetColorMode(mode)
 	}
 
-	if mode == false {
+	if !mode {
 		log.SetJSONMode(true)
 	}
 	log.SetColorMode(mode)
