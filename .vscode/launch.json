@@ -33,6 +33,36 @@
       "program": "${workspaceRoot}/examples/myservice/",
       "args": ["start"]
     },
+    {
+      "name": "Launch 'examples/myservice/ start [service]' ...",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      //   "buildFlags": "-tags='delve verbose'",
+      "cwd": "${workspaceRoot}",
+      "program": "${workspaceRoot}/examples/myservice/",
+      "args": ["start", "-foreground", "-service"]
+    },
+    {
+      "name": "Launch 'examples/myservice/ stop' ...",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      //   "buildFlags": "-tags='delve verbose'",
+      "cwd": "${workspaceRoot}",
+      "program": "${workspaceRoot}/examples/myservice/",
+      "args": ["stop", "-3"]
+    },
+    {
+      "name": "Launch 'examples/myservice/ install' ...",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      //   "buildFlags": "-tags='delve verbose'",
+      "cwd": "${workspaceRoot}",
+      "program": "${workspaceRoot}/examples/myservice/",
+      "args": ["install", "-force"]
+    },
 
     {
       "name": "> Launch Package",
