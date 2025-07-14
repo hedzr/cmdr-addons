@@ -8,10 +8,10 @@ toolchain go1.23.3
 
 // replace gopkg.in/hedzr/errors.v3 => ../../24/libs.errors
 
-require github.com/hedzr/logg v0.8.43
+require github.com/hedzr/logg v0.8.45
 
 require (
-	github.com/hedzr/is v0.8.43 // indirect
+	github.com/hedzr/is v0.8.45 // indirect
 	golang.org/x/net v0.42.0 // indirect
 	golang.org/x/sys v0.34.0 // indirect
 	golang.org/x/term v0.33.0 // indirect
