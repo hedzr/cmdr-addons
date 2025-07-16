@@ -20,6 +20,16 @@ See also:
 
 - [cmdr/v2](https://github.com/hedzr/cmdr)
 
+## Addons
+
+### `Service`
+
+`github.com/hedzr/cmdr-addons/service/v2`, as its name hints, is a cross-platform service wrapper for macOS, Linux and Windows.
+
+### `pgsqlogger`
+
+`github.com/hedzr/cmdr-addons/pgsqlogger/v2`, is a pluggable `Writer` for `hedzr/logg/slog`, which can copy the logging lines into postgresql.
+
 ## History
 
 See full list in [CHANGELOG](https://github.com/hedzr/cmdr-addons/blob/master/CHANGELOG)
