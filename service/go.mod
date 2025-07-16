@@ -6,14 +6,16 @@ toolchain go1.23.3
 
 replace github.com/hedzr/cmdr-addons => ../
 
+replace github.com/hedzr/cmdr-addons/v2 => ../
+
 // replace github.com/hedzr/cmdr/v2 => ../cmdr
 
 // replace gopkg.in/hedzr/errors.v3 => ../../24/libs.errors
 
 require (
-	github.com/hedzr/cmdr-addons/v2 v2.0.7
-	github.com/hedzr/is v0.8.43
-	github.com/hedzr/logg v0.8.43
+	github.com/hedzr/cmdr-addons/v2 v2.0.8
+	github.com/hedzr/is v0.8.46
+	github.com/hedzr/logg v0.8.46
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/sys v0.34.0
 	gopkg.in/hedzr/errors.v3 v3.3.5

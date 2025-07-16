@@ -1,11 +1,9 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/hedzr/cmdr-addons/v2 v2.0.6 h1:f17Cc1kd4FXcohQcDWqxkYYrE0yJe5n1rqjpA2+Nlok=
-github.com/hedzr/cmdr-addons/v2 v2.0.6/go.mod h1:8igWA4HF39pG2xVpzjXRsS2xDYDlfuuy/aslIhsbkr8=
-github.com/hedzr/is v0.8.43 h1:FTA/q+lANqumtoH8DRdvr/8H5xq7Xd+eqxZp6jia/Pw=
-github.com/hedzr/is v0.8.43/go.mod h1:3tQ4l88jBODCuqvuARWDSM8lkro2+EOUGT1mKEraWM0=
-github.com/hedzr/logg v0.8.43 h1:bPSNRasiXhglGbXxD8TCZWA00yTdieCslB+x6pjqyrU=
-github.com/hedzr/logg v0.8.43/go.mod h1:m6z4r3Q7HWakYShLPfpNNqvPZxsCzcpYwfGNoPAlWyg=
+github.com/hedzr/is v0.8.46 h1:6KnUv5hPOf0hzdw1HcbHS4ocmeYIA+sMpVXN1r6ag9o=
+github.com/hedzr/is v0.8.46/go.mod h1:F/8gFkf0IB9/ED13/lbUkqf4RSOds/uerBKt0wde+rk=
+github.com/hedzr/logg v0.8.46 h1:kzd8bmA8Tu3o9DMglMMGh6ep1XoP5w9w27lySNdtp4Q=
+github.com/hedzr/logg v0.8.46/go.mod h1:p9P0W6RvsulDXFWwfbhv4rQalMUVO6IRvjb6lMGKX1A=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOfJA=
