@@ -1,4 +1,4 @@
-package psqlogger
+package pgsqlogger
 
 import (
 	"context"
