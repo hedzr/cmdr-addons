@@ -1,1 +1,10 @@
 # CHANGELOG
+
+- v2.0.8
+  - added new submodule `pgsqlogger` beta - for `hedzr/logg/slog`
+  - submodule `service` get a stable ci releaser now
+  - upgrade deps & security patches
+
+- v2.0.0 - 7
+  - the initial releases of cmdr-addons.v2
+  - integrating with new ci releaser
