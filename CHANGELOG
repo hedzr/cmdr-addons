@@ -1,5 +1,9 @@
 # CHANGELOG
 
+- v2.0.11
+  - upgrade deps
+  - [pgsqlogger] improved `New` - added opts args and `WithTableName(name) Opt`
+
 - v2.0.8
   - added new submodule `pgsqlogger` beta - for `hedzr/logg/slog`
   - submodule `service` get a stable ci releaser now
