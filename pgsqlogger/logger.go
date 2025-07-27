@@ -48,20 +48,34 @@ var _ logz.LogWriter = (*PGSQLLogger)(nil)
 //	    tm timestamp,
 //	    msg jsonb -- text -- varchar(120)
 //	);
-func New() *PGSQLLogger {
-	return &PGSQLLogger{sqlog: &sqlog{}}
+func New(opts ...Opt) *PGSQLLogger {
+	s := &PGSQLLogger{sqlog: &sqlog{}}
+	for _, opt := range opts {
+		opt(s)
+	}
+	return s
+}
+
+type Opt func(s *PGSQLLogger)
+
+func WithTableName(tableName string) Opt {
+	return func(s *PGSQLLogger) {
+		s.tableName = tableName
+	}
 }
 
 type ConnectOpt struct {
-	Host     string `json:"host,omitempty"`
-	Port     int    `json:"port,omitempty"`
-	User     string `json:"user,omitempty"`
-	Password string `json:"password,omitempty"`
-	DBName   string `json:"db,omitempty"`
+	Host      string `json:"host,omitempty"`
+	Port      int    `json:"port,omitempty"`
+	User      string `json:"user,omitempty"`
+	Password  string `json:"password,omitempty"`
+	DbName    string `json:"db,omitempty"`
+	TableName string `json:"table,omitempty"`
 }
 
 type PGSQLLogger struct {
 	*sqlog
+	tableName   string
 	stmt        *sql.Stmt
 	closed      int32
 	cachedLevel logz.Level
@@ -71,6 +85,14 @@ func (s *PGSQLLogger) Open(ctx context.Context, opt *ConnectOpt) (err error) {
 	if err = s.Connect(ctx, opt); err != nil {
 		return
 	}
+
+	if opt.TableName != "" {
+		s.tableName = opt.TableName
+	}
+	if s.tableName == "" {
+		s.tableName = "db_logging"
+	}
+
 	err = s.Prepare(ctx)
 	return
 }
@@ -97,7 +119,7 @@ func (s *PGSQLLogger) Prepare(ctx context.Context) (err error) {
 	// query := `PREPARE insert_logging_line_plan (text) AS
 	// 	INSERT INTO db_logging (tm, msg) VALUES (CURRENT_TIMESTAMP, $1);`
 	// query := `INSERT INTO db_logging (tm, level, msg) VALUES (CURRENT_TIMESTAMP, $1, $2);`
-	query := `INSERT INTO db_logging (tm, msg) VALUES (CURRENT_TIMESTAMP, $1);`
+	query := fmt.Sprintf(`INSERT INTO %s (tm, msg) VALUES (CURRENT_TIMESTAMP, $1);`, s.tableName)
 	s.stmt, err = s.PrepareContext(ctx, query)
 	return
 }
@@ -150,7 +172,7 @@ func (s *sqlog) Connect(ctx context.Context, opt *ConnectOpt) (err error) {
 
 	dsn := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		opt.Host, opt.Port, opt.User, opt.Password, opt.DBName)
+		opt.Host, opt.Port, opt.User, opt.Password, opt.DbName)
 
 	logz.Verbose(`opening database...`, "DSN", dsn)
 
