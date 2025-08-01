@@ -51,8 +51,9 @@ jobs:
           preserve_order: true
           # body_path: relnotes.md
           body: |
-            This release was created by: ${{ github.event.sender.login }}
-            Release of Cmdr-Addons, built from commit ${{ env.SHORT_SHA }}, is now available.
+            cmdr.addons.v2, built from commit ${{ env.SHORT_SHA }}, provides some extensions arround cmdr.v2.
+
+            ${{ github.event.head_commit.message }}
           files: |
             *.zip
           # # body: |
