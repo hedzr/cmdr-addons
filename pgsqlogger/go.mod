@@ -13,7 +13,7 @@ toolchain go1.23.3
 // replace gopkg.in/hedzr/errors.v3 => ../../24/libs.errors
 
 require (
-	github.com/hedzr/logg v0.8.47
+	github.com/hedzr/logg v0.8.48
 	github.com/lib/pq v1.10.9
 )
 

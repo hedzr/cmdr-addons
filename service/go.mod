@@ -13,9 +13,9 @@ replace github.com/hedzr/cmdr-addons/v2 => ../
 // replace gopkg.in/hedzr/errors.v3 => ../../24/libs.errors
 
 require (
-	github.com/hedzr/cmdr-addons/v2 v2.0.11
+	github.com/hedzr/cmdr-addons/v2 v2.0.12
 	github.com/hedzr/is v0.8.47
-	github.com/hedzr/logg v0.8.47
+	github.com/hedzr/logg v0.8.48
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/sys v0.34.0
 	gopkg.in/hedzr/errors.v3 v3.3.5
