@@ -1,5 +1,8 @@
 # CHANGELOG
 
+- v2.0.13 / [pgsqlogger] / [service]
+  - upgrade cmdr to v2.1.50
+
 - v2.0.12 / [pgsqlogger] / [service]
   - upgrade deps
   - [pgsqlogger] to v2.0.12
