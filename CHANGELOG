@@ -1,5 +1,10 @@
 # CHANGELOG
 
+- v2.0.12 / [pgsqlogger] / [service]
+  - upgrade deps
+  - [pgsqlogger] to v2.0.12
+  - [service] to v2.0.12
+
 - v2.0.11
   - upgrade deps
   - [pgsqlogger] improved `New` - added opts args and `WithTableName(name) Opt`
