@@ -1,5 +1,9 @@
 # CHANGELOG
 
+- v2.0.15 / [pgsqlogger] / [service]
+  - upgrade cmdr to v2.1.51
+  - security patch
+
 - v2.0.13 / [pgsqlogger] / [service]
   - upgrade cmdr to v2.1.50
 
