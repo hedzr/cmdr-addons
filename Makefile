@@ -46,13 +46,13 @@ $(LOGS_DIR):
 .PHONY: directories
 directories: | $(BUILD_DIR) $(LOGS_DIR)
 
-## build: build executable for current OS and CPU (arch)
+## build: build executable ($(BUILD_DIR)/$(NAME)) for current OS and CPU (arch)
 build: $(BUILD_DIR)/$(NAME)
 	#$(LL) $(BUILD_DIR)/$(NAME)
 	cp $(BUILD_DIR)/$(NAME) ~/go/bin/ && echo "- INSTALL TO ~/go/bin OK."
 	@echo "- BUILD $(BUILD_DIR)/$(NAME) OK."
 
-## build: build executable for current OS and CPU (arch)
+## build-default: build executable ($(DEFAULT_TARGET)) for current OS and CPU (arch)
 build-default: $(DEFAULT_TARGET)
 	@echo BUILD OK
 
