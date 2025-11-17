@@ -1,5 +1,12 @@
 # CHANGELOG
 
+- v2.0.25 / [pgsqlogger] / [service]
+  - upgrade cmdr to v2.1.65
+  - improved filelock
+  - improved pidfile
+  - fix service behavior in linux systemd
+  - other improvements & fixes
+
 - v2.0.21 / [pgsqlogger] / [service]
   - upgrade cmdr to v2.1.61
 
