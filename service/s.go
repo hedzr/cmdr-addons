@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"os"
+	"syscall"
 
 	"github.com/hedzr/is"
 	"github.com/hedzr/is/basics"
@@ -104,6 +106,14 @@ func (s *mgmtS) Control(ctx context.Context, config *Config, cmd Command) (err e
 
 				if cmd == Start && s.serviceMode && !systems.HasNTService {
 					s.pidfile, err = newpidfile(ctx, s, config)
+					if err != nil {
+						var ep *os.PathError
+						if errors.As(err, &ep) {
+							if ep.Err == syscall.EACCES {
+								dbglog.DebugContext(ctx, "[mgmtS] [TODO] retry pidfile initializing with sudo", "pidfile", s.pidfile.file)
+							}
+						}
+					}
 				}
 
 				if systems.HasNTService {

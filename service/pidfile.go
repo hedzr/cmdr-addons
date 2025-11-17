@@ -2,13 +2,18 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
+	"os/user"
 	"path"
 	"strconv"
+	"syscall"
 
 	"github.com/hedzr/is"
 	"github.com/hedzr/is/dir"
+	"github.com/hedzr/is/exec"
+	"gopkg.in/hedzr/errors.v3"
 
 	"github.com/hedzr/cmdr-addons/service/v2/filelock"
 	"github.com/hedzr/cmdr-addons/v2/tool/dbglog"
@@ -46,34 +51,67 @@ func (p *pidFileS) Close() {
 
 func (p *pidFileS) init(ctx context.Context, s *mgmtS, c *Config) (err error) {
 	p.file = path.Join(c.RunDir, c.Name+".pid")
+	_ = s
+
+	currentUser, err := user.Current()
+	if err != nil {
+		dbglog.Error("Error getting current user", "err", err)
+	}
+
+	needSudo := currentUser.Username == "root"
+	pid := os.Getpid()
+
 	if dir.FileExists(path.Dir(p.file)) {
 		var locked bool
 		f := filelock.New(p.file)
 		locked, err = f.TryLock()
 		if err != nil {
-			return
+			var pass bool
+			var ep *os.PathError
+			if errors.As(err, &ep) {
+				if ep.Err == syscall.EACCES {
+					dbglog.DebugContext(ctx, "[pidFileS] retry pidfile initializing with sudo", "pidfile", p.file)
+					exec.Sudo("rm", "-f", p.file)
+					needSudo, pass = true, true
+					err = nil
+				}
+			}
+			if !pass {
+				dbglog.Error("Failed to init (and lock) pidfile (flck)", "err", err, "pidfile", p.file)
+				return
+			}
 		}
 
 		if !locked {
 			if err = f.Unlock(); err != nil {
 				return
 			}
-			if p.f, err = os.Create(p.file); err != nil {
-				return
+			if needSudo {
+				exec.Sudo("sh", "-c", fmt.Sprintf("echo > %s && chown %s: %s", p.file, currentUser.Username, p.file))
+				p.f, err = os.Open(p.file)
+				if err != nil {
+					dbglog.Error("Error open pidfile", "err", err)
+				}
+			} else {
+				if p.f, err = os.Create(p.file); err != nil {
+					return
+				}
 			}
-			if _, err = p.f.WriteString(strconv.Itoa(os.Getpid())); err != nil {
+			if _, err = p.f.WriteString(strconv.Itoa(pid)); err != nil {
+				dbglog.Error("Error write pidfile", "err", err)
 				return
 			}
 			is.Closers().RegisterPeripheral(p)
-			dbglog.InfoContext(ctx, "pid file created", "file", p.file, "pid", os.Getpid())
+			dbglog.InfoContext(ctx, "pid file created", "file", p.file, "pid", pid)
 		} else {
 			// update pid
 			p.flck = f
-			if _, err = p.flck.WriteString(strconv.Itoa(os.Getpid())); err != nil {
+			if _, err = p.flck.WriteString(strconv.Itoa(pid)); err != nil {
+				dbglog.Error("Error write pidfile", "err", err)
 				return
 			}
 			is.Closers().RegisterPeripheral(p)
-			dbglog.WarnContext(ctx, "pid file updated", "file", p.file, "pid", os.Getpid())
+			dbglog.InfoContext(ctx, "pid file updated", "file", p.file, "pid", pid)
 		}
 	}
 	return
