@@ -50,6 +50,8 @@ func New(path string, opts ...Option) *Filelock {
 	case "aix", "solaris", "illumos":
 		// AIX cannot preform write-lock (i.e. exclusive) on a read-only file.
 		flags |= os.O_RDWR
+	case "linux":
+		flags |= os.O_RDWR
 	default:
 		flags |= os.O_RDONLY
 	}
