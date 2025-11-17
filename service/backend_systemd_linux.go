@@ -204,24 +204,29 @@ func systemdStart(ctx context.Context, config *Config, m *mgmtS, s *systemD) (er
 		}
 	}
 
-	// call into Entity.Start if exists
+	// call into EntityStartAware.Start if exists
 	if fn, ok := config.Entity.(EntityStartAware); ok {
 		dbglog.DebugContext(ctx, "start EntityStartAware")
 		_ = s.Logger.Infof("start EntityStartAware\n")
-		return fn.Start(ctx, config, s.Logger)
+		err = fn.Start(ctx, config, s.Logger)
+		if err == nil && m.serviceMode && m.fore {
+			err = enterLoop(ctx, config, m, s)
+		}
+		return
 	}
 
+	// call into RunnableService.Run if exists
 	if m.fore {
 		if prog, ok := config.Entity.(RunnableService); ok {
 			prog.SetServiceMode(m.serviceMode)
 			_ = s.Logger.Infof("run program...\n")
 			println("run program...")
 			err = prog.Run(ctx, config, s.Logger)
-			if err != nil {
-				return
-			}
 		}
-		return enterLoop(ctx, config, m, s)
+		if err == nil && m.serviceMode && m.fore {
+			err = enterLoop(ctx, config, m, s)
+		}
+		return
 	}
 
 	// or, call systemd command to trigger the real serivce starting
