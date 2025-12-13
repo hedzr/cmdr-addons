@@ -13,18 +13,18 @@ replace github.com/hedzr/cmdr-addons/v2 => ../
 // replace gopkg.in/hedzr/errors.v3 => ../../24/libs.errors
 
 require (
-	github.com/hedzr/cmdr-addons/v2 v2.0.25
-	github.com/hedzr/is v0.8.65
-	github.com/hedzr/logg v0.8.65
+	github.com/hedzr/cmdr-addons/v2 v2.0.26
+	github.com/hedzr/is v0.8.66
+	github.com/hedzr/logg v0.8.66
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/sys v0.38.0
+	golang.org/x/sys v0.39.0
 	gopkg.in/hedzr/errors.v3 v3.3.5
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/net v0.47.0 // indirect
-	golang.org/x/term v0.37.0 // indirect
+	golang.org/x/net v0.48.0 // indirect
+	golang.org/x/term v0.38.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
