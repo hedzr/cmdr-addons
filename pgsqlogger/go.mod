@@ -13,14 +13,14 @@ toolchain go1.24.5
 // replace gopkg.in/hedzr/errors.v3 => ../../24/libs.errors
 
 require (
-	github.com/hedzr/logg v0.8.66
+	github.com/hedzr/logg v0.8.67
 	github.com/lib/pq v1.10.9
 )
 
 require (
-	github.com/hedzr/is v0.8.66 // indirect
-	golang.org/x/net v0.48.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
-	golang.org/x/term v0.38.0 // indirect
+	github.com/hedzr/is v0.8.67 // indirect
+	golang.org/x/net v0.49.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/term v0.39.0 // indirect
 	gopkg.in/hedzr/errors.v3 v3.3.5 // indirect
 )
