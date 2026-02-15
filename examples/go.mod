@@ -8,9 +8,9 @@ replace github.com/hedzr/cmdr-addons/service/v2 => ../service
 
 require (
 	github.com/hedzr/cmdr-addons/service/v2 v2.0.27
-	github.com/hedzr/cmdr-addons/v2 v2.0.27
-	github.com/hedzr/cmdr-loaders v1.3.67
-	github.com/hedzr/cmdr/v2 v2.1.67
+	github.com/hedzr/cmdr-addons/v2 v2.2.0
+	github.com/hedzr/cmdr-loaders v1.4.0
+	github.com/hedzr/cmdr/v2 v2.2.0
 	github.com/hedzr/is v0.9.0
 	github.com/hedzr/store v1.4.0
 	gopkg.in/hedzr/errors.v3 v3.3.5
