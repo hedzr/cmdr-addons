@@ -1,8 +1,6 @@
 module github.com/hedzr/cmdr-addons/service/v2
 
-go 1.24.0
-
-toolchain go1.24.5
+go 1.25.0
 
 replace github.com/hedzr/cmdr-addons => ../
 
@@ -14,17 +12,17 @@ replace github.com/hedzr/cmdr-addons/v2 => ../
 
 require (
 	github.com/hedzr/cmdr-addons/v2 v2.0.27
-	github.com/hedzr/is v0.8.67
-	github.com/hedzr/logg v0.8.67
+	github.com/hedzr/is v0.9.0
+	github.com/hedzr/logg v0.9.0
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/sys v0.40.0
+	golang.org/x/sys v0.41.0
 	gopkg.in/hedzr/errors.v3 v3.3.5
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/net v0.49.0 // indirect
-	golang.org/x/term v0.39.0 // indirect
+	golang.org/x/net v0.50.0 // indirect
+	golang.org/x/term v0.40.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
