@@ -1,5 +1,10 @@
 # CHANGELOG
 
+- v2.2.0 / [pgsqlogger] / [service]
+  - upgrade cmdr to v2.2.0
+  - upgrade to go toolchain 1.25.0
+  - keep the version same with cmdr.v2
+
 - v2.0.27 / [pgsqlogger] / [service]
   - upgrade cmdr to v2.1.67
   - security patch
