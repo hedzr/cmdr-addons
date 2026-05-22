@@ -12,7 +12,7 @@ go 1.25.0
 
 require (
 	github.com/hedzr/logg v0.9.0
-	github.com/lib/pq v1.11.2
+	github.com/lib/pq v1.12.3
 )
 
 require (
