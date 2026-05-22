@@ -15,7 +15,7 @@ require (
 	github.com/hedzr/is v0.9.1
 	github.com/hedzr/logg v0.9.0
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/sys v0.42.0
+	golang.org/x/sys v0.45.0
 	gopkg.in/hedzr/errors.v3 v3.3.5
 )
 
