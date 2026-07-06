@@ -2,8 +2,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/hedzr/is v0.9.3 h1:6dWn5ttbsFFhBLwnnugGdlFmOYHpMru5KmYTnjquiLo=
 github.com/hedzr/is v0.9.3/go.mod h1:LPuB2+XV+Su3FVWg3ZQfpwnLVPCY2dStikYuy+YQvHo=
-github.com/hedzr/logg v0.9.0 h1:qpP+6hKWqXbz5RVgV1OdHASaO6Ju8e+zq6j2ptAwuxw=
-github.com/hedzr/logg v0.9.0/go.mod h1:mdkeXswdTgwIL2nilO3pyjIl266eIQPLXlELTDWLgyo=
+github.com/hedzr/logg v0.9.3 h1:+/h8dIzu/OLbWdq2wtqhOcMWRvwu4j81plF0VaDav2M=
+github.com/hedzr/logg v0.9.3/go.mod h1:fld/JJrz7OGsoFCav0KiIp2Tdd2ShfRl2Egv7eZL24s=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=

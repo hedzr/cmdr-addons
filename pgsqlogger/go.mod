@@ -11,7 +11,7 @@ go 1.25.0
 // replace gopkg.in/hedzr/errors.v3 => ../../24/libs.errors
 
 require (
-	github.com/hedzr/logg v0.9.0
+	github.com/hedzr/logg v0.9.3
 	github.com/lib/pq v1.12.3
 )
 

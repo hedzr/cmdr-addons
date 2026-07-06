@@ -23,7 +23,7 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.24.0 // indirect
 	github.com/hedzr/evendeep v1.4.0 // indirect
-	github.com/hedzr/logg v0.9.0 // indirect
+	github.com/hedzr/logg v0.9.3 // indirect
 	github.com/hedzr/store/codecs/hcl v1.4.0 // indirect
 	github.com/hedzr/store/codecs/hjson v1.4.0 // indirect
 	github.com/hedzr/store/codecs/json v1.4.0 // indirect

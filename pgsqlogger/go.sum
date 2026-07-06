@@ -1,7 +1,7 @@
 github.com/hedzr/is v0.9.3 h1:6dWn5ttbsFFhBLwnnugGdlFmOYHpMru5KmYTnjquiLo=
 github.com/hedzr/is v0.9.3/go.mod h1:LPuB2+XV+Su3FVWg3ZQfpwnLVPCY2dStikYuy+YQvHo=
-github.com/hedzr/logg v0.9.0 h1:qpP+6hKWqXbz5RVgV1OdHASaO6Ju8e+zq6j2ptAwuxw=
-github.com/hedzr/logg v0.9.0/go.mod h1:mdkeXswdTgwIL2nilO3pyjIl266eIQPLXlELTDWLgyo=
+github.com/hedzr/logg v0.9.3 h1:+/h8dIzu/OLbWdq2wtqhOcMWRvwu4j81plF0VaDav2M=
+github.com/hedzr/logg v0.9.3/go.mod h1:fld/JJrz7OGsoFCav0KiIp2Tdd2ShfRl2Egv7eZL24s=
 github.com/lib/pq v1.12.3 h1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=
 github.com/lib/pq v1.12.3/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA=
 golang.org/x/net v0.56.0 h1:Rw8j/hFzGvJUZwNBXnAtf5sVDVt+65SK2C7IxCxZt5o=

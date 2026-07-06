@@ -13,7 +13,7 @@ replace github.com/hedzr/cmdr-addons/v2 => ../
 require (
 	github.com/hedzr/cmdr-addons/v2 v2.2.0
 	github.com/hedzr/is v0.9.3
-	github.com/hedzr/logg v0.9.0
+	github.com/hedzr/logg v0.9.3
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/sys v0.46.0
 	gopkg.in/hedzr/errors.v3 v3.3.5
