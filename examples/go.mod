@@ -9,7 +9,7 @@ replace github.com/hedzr/cmdr-addons/service/v2 => ../service
 require (
 	github.com/hedzr/cmdr-addons/service/v2 v2.2.0
 	github.com/hedzr/cmdr-addons/v2 v2.2.3
-	github.com/hedzr/cmdr-loaders v1.4.0
+	github.com/hedzr/cmdr-loaders v1.4.3
 	github.com/hedzr/cmdr/v2 v2.2.3
 	github.com/hedzr/is v0.9.3
 	github.com/hedzr/store v1.4.3
@@ -34,7 +34,6 @@ require (
 	github.com/hedzr/store/providers/env v1.4.3 // indirect
 	github.com/hedzr/store/providers/file v1.4.3 // indirect
 	github.com/hjson/hjson-go/v4 v4.6.0 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/npillmayer/nestext v0.1.3 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
