@@ -1,5 +1,5 @@
-github.com/hedzr/is v0.9.3 h1:6dWn5ttbsFFhBLwnnugGdlFmOYHpMru5KmYTnjquiLo=
-github.com/hedzr/is v0.9.3/go.mod h1:LPuB2+XV+Su3FVWg3ZQfpwnLVPCY2dStikYuy+YQvHo=
+github.com/hedzr/is v0.9.5 h1:mI21iVpY0JDv/0eNai0AtqVlyUC6q5vB8SyNGyAY5wM=
+github.com/hedzr/is v0.9.5/go.mod h1:yiq2JVPRbecrdJjQjqZTg9u7vCppSm3iwD1QigWoHDw=
 github.com/hedzr/logg v0.9.3 h1:+/h8dIzu/OLbWdq2wtqhOcMWRvwu4j81plF0VaDav2M=
 github.com/hedzr/logg v0.9.3/go.mod h1:fld/JJrz7OGsoFCav0KiIp2Tdd2ShfRl2Egv7eZL24s=
 github.com/lib/pq v1.12.3 h1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=

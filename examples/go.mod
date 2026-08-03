@@ -11,7 +11,7 @@ require (
 	github.com/hedzr/cmdr-addons/v2 v2.2.3
 	github.com/hedzr/cmdr-loaders v1.4.3
 	github.com/hedzr/cmdr/v2 v2.2.3
-	github.com/hedzr/is v0.9.3
+	github.com/hedzr/is v0.9.5
 	github.com/hedzr/store v1.4.3
 	gopkg.in/hedzr/errors.v3 v3.3.5
 )
