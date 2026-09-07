@@ -12,7 +12,7 @@ replace github.com/hedzr/cmdr-addons/v2 => ../
 
 require (
 	github.com/hedzr/cmdr-addons/v2 v2.2.3
-	github.com/hedzr/is v0.9.5
+	github.com/hedzr/is v0.9.6
 	github.com/hedzr/logg v0.9.5
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/sys v0.47.0
@@ -21,6 +21,6 @@ require (
 
 require (
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/net v0.57.0 // indirect
+	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/term v0.45.0 // indirect
 )
