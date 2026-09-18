@@ -6,7 +6,7 @@ go 1.26.0
 
 // replace gopkg.in/hedzr/errors.v3 => ../../24/libs.errors
 
-require github.com/hedzr/logg v0.9.5
+require github.com/hedzr/logg v0.9.6
 
 require (
 	github.com/hedzr/is v0.9.6 // indirect
