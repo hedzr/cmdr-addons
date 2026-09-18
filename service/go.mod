@@ -1,6 +1,6 @@
 module github.com/hedzr/cmdr-addons/service/v2
 
-go 1.25.0
+go 1.26.0
 
 replace github.com/hedzr/cmdr-addons => ../
 
@@ -15,7 +15,7 @@ require (
 	github.com/hedzr/is v0.9.6
 	github.com/hedzr/logg v0.9.5
 	github.com/stretchr/testify v1.12.1
-	golang.org/x/sys v0.47.0
+	golang.org/x/sys v0.48.0
 	gopkg.in/hedzr/errors.v3 v3.3.5
 )
 

@@ -1,6 +1,6 @@
 module github.com/hedzr/cmdr-addons/v2
 
-go 1.25.0
+go 1.26.0
 
 // replace github.com/hedzr/cmdr/v2 => ../cmdr
 
@@ -11,7 +11,7 @@ require github.com/hedzr/logg v0.9.5
 require (
 	github.com/hedzr/is v0.9.6 // indirect
 	golang.org/x/net v0.58.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/term v0.45.0 // indirect
 	gopkg.in/hedzr/errors.v3 v3.3.5 // indirect
 )
