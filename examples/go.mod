@@ -11,7 +11,7 @@ require (
 	github.com/hedzr/cmdr-addons/v2 v2.2.9
 	github.com/hedzr/cmdr-loaders v1.4.9
 	github.com/hedzr/cmdr/v2 v2.2.9
-	github.com/hedzr/is v0.9.9
+	github.com/hedzr/is v0.9.10
 	github.com/hedzr/store v1.4.9
 	gopkg.in/hedzr/errors.v3 v3.3.5
 )
@@ -40,11 +40,11 @@ require (
 	github.com/zclconf/go-cty v1.19.0 // indirect
 	golang.org/x/exp v0.0.0-20260908205506-85c1c2202aba // indirect
 	golang.org/x/mod v0.41.0 // indirect
-	golang.org/x/net v0.59.0 // indirect
-	golang.org/x/sync v0.23.0 // indirect
+	golang.org/x/net v0.61.0 // indirect
+	golang.org/x/sync v0.24.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/term v0.46.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
-	golang.org/x/tools v0.50.0 // indirect
+	golang.org/x/term v0.47.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
+	golang.org/x/tools v0.51.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
