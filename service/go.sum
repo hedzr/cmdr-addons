@@ -1,7 +1,7 @@
 github.com/hedzr/is v0.9.10 h1:VebzYeRb74zK4VaaXUqmYNfJuunTxSz0rmhGZtxy+dY=
 github.com/hedzr/is v0.9.10/go.mod h1:7gQ+fIoyxhwZzolJLvTXS+hd20dth9mr55XJl6gL4x4=
-github.com/hedzr/logg v0.9.9 h1:y0PPriUkk849XJgh9mnXHJ0SH0a3iFOCMhwXjS80R1g=
-github.com/hedzr/logg v0.9.9/go.mod h1:21s5veN200v7OREfTlaWzsh/C7nGvSKJmMCj0vQy/Vo=
+github.com/hedzr/logg v0.9.10 h1:ti7bpkVZEnj1AIXQTKA2rJK7+80+jOh20Zyw2ZRdkes=
+github.com/hedzr/logg v0.9.10/go.mod h1:KdF86qAnb379d7/fsGSkJFgrmRGeKKl2x62EDqmp0ug=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 go.yaml.in/yaml/v3 v3.0.5 h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=
